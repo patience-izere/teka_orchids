@@ -1,66 +1,256 @@
 {% extends 'client_portal/base.html' %}
 {% load static %}
 
-{% block title %}Discover Local Chefs - Teka{% endblock %}
+{% block title %}Teka - Discover Local Chefs & Home-Cooked Meals{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<section class="bg-primary text-white py-5">
-    <div class="container">
-        <div class="row align-items-center">
+<section class="hero-section position-relative overflow-hidden">
+    <div class="hero-pattern position-absolute w-100 h-100" style="background: url('data:image/svg+xml,<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h20v20H0z" fill="none"/><circle cx="3" cy="3" r="1" fill="rgba(255,255,255,0.1)"/></svg>') repeat;"></div>
+    <div class="container position-relative" style="z-index: 1;">
+        <div class="row align-items-center min-vh-75">
             <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-3">Authentic Home-Cooked Meals</h1>
-                <p class="lead mb-4">Discover passionate local chefs creating unique, homemade dishes in your neighborhood. Support your community while enjoying authentic flavors.</p>
-                <div class="d-flex gap-3">
-                    <button class="btn btn-light btn-lg" onclick="findMyLocation()">
-                        <i class="bi bi-geo-alt me-2"></i>Find Chefs Near Me
+                <h1 class="display-4 fw-bold mb-4 animate-fade-in">Discover Authentic Home-Cooked Meals</h1>
+                <p class="lead mb-5 animate-fade-in">Connect with talented local chefs and experience the taste of home-cooked perfection delivered to your doorstep.</p>
+                <div class="d-flex gap-3 animate-fade-in">
+                    <button class="btn btn-primary btn-lg" onclick="findMyLocation()">
+                        <i class="fas fa-map-marker-alt me-2"></i>Find Nearby Chefs
                     </button>
-                    <a href="{% url 'client_portal:chef_list' %}" class="btn btn-outline-light btn-lg">Browse All Chefs</a>
+                    <a href="{% url 'client_portal:chef_list' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-utensils me-2"></i>Browse All Chefs
+                    </a>
                 </div>
             </div>
-            <div class="col-lg-6">
-                <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Home cooking" class="img-fluid rounded shadow">
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Location Search -->
-<section class="py-4 bg-light">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="input-group input-group-lg">
-                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                    <input type="text" id="location-search" class="form-control" placeholder="Enter your address or postal code">
-                    <button class="btn btn-primary" type="button" onclick="searchLocation()">
-                        <i class="bi bi-search me-1"></i>Search Chefs
-                    </button>
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="position-relative">
+                    <div class="hero-image-grid">
+                        <img src="https://images.unsplash.com/photo-1542528180-a1208c5169a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Food Image 1" class="img-fluid rounded-xl shadow-lg">
+                        <img src="https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Food Image 2" class="img-fluid rounded-xl shadow-lg">
+                        <img src="https://images.unsplash.com/photo-1495521821757-a1efb6729352?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Food Image 3" class="img-fluid rounded-xl shadow-lg">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Featured Chefs -->
+<!-- How It Works Section -->
 <section class="py-5">
     <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-6 fw-bold mb-3">How Teka Works</h2>
+            <p class="text-muted">Three simple steps to enjoy homemade meals</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4">
+                    <div class="card-body">
+                        <div class="feature-icon mb-4">
+                            <i class="fas fa-search fa-2x text-primary"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">1. Discover</h4>
+                        <p class="text-muted">Browse through our curated selection of talented home chefs in your area.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4">
+                    <div class="card-body">
+                        <div class="feature-icon mb-4">
+                            <i class="fas fa-clipboard-list fa-2x text-primary"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">2. Order</h4>
+                        <p class="text-muted">Select your favorite dishes and customize your order to your preferences.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4">
+                    <div class="card-body">
+                        <div class="feature-icon mb-4">
+                            <i class="fas fa-heart fa-2x text-primary"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">3. Enjoy</h4>
+                        <p class="text-muted">Savor authentic home-cooked meals prepared with love and care.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Chefs Section -->
+<section class="py-5 bg-light">
+    <div class="container">
         <div class="row mb-4">
-            <div class="col">
-                <h2 class="text-center mb-3">Featured Chefs in Your Area</h2>
-                <p class="text-center text-muted">Discover talented home chefs creating amazing dishes near you</p>
+            <div class="col-lg-6">
+                <h2 class="display-6 fw-bold mb-3">Featured Chefs</h2>
+                <p class="text-muted">Discover talented chefs creating amazing dishes near you</p>
+            </div>
+            <div class="col-lg-6 text-lg-end">
+                <a href="{% url 'client_portal:chef_list' %}" class="btn btn-outline-primary">
+                    View All Chefs <i class="fas fa-arrow-right ms-2"></i>
+                </a>
             </div>
         </div>
         
-        <div id="featured-chefs" class="row">
-            {% if featured_chefs and featured_chefs|length > 0 %}
-                {% for chef in featured_chefs %}
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card h-100 chef-card" onclick="window.location.href='{% url 'client_portal:chef_detail' chef.id %}'">
-                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                            {% if chef.profile_picture %}
-                                <img src="{{ chef.profile_picture.url }}" alt="{{ chef.user.get_full_name }}" class="img-fluid rounded">
-                            {% else %}
+        <div id="featured-chefs" class="row g-4">
+            <!-- Chef cards will be loaded dynamically via JavaScript -->
+        </div>
+    </div>
+</section>
+
+<!-- Cuisine Categories Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-6 fw-bold mb-3">Explore Cuisines</h2>
+            <p class="text-muted">Discover diverse culinary traditions from around the world</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <a href="{% url 'client_portal:chef_list' %}?cuisine=italian" class="text-decoration-none">
+                    <div class="cuisine-card card border-0 shadow-sm overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1498579397066-22750a3cb424?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img" alt="Italian Cuisine">
+                        <div class="card-img-overlay d-flex align-items-end">
+                            <div class="w-100 text-white p-3" style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+                                <h4 class="mb-0">Italian</h4>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <a href="{% url 'client_portal:chef_list' %}?cuisine=asian" class="text-decoration-none">
+                    <div class="cuisine-card card border-0 shadow-sm overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img" alt="Asian Cuisine">
+                        <div class="card-img-overlay d-flex align-items-end">
+                            <div class="w-100 text-white p-3" style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+                                <h4 class="mb-0">Asian</h4>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <a href="{% url 'client_portal:chef_list' %}?cuisine=mediterranean" class="text-decoration-none">
+                    <div class="cuisine-card card border-0 shadow-sm overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img" alt="Mediterranean Cuisine">
+                        <div class="card-img-overlay d-flex align-items-end">
+                            <div class="w-100 text-white p-3" style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+                                <h4 class="mb-0">Mediterranean</h4>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <a href="{% url 'client_portal:chef_list' %}?cuisine=mexican" class="text-decoration-none">
+                    <div class="cuisine-card card border-0 shadow-sm overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1552332386-f8dd00dc2f85?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img" alt="Mexican Cuisine">
+                        <div class="card-img-overlay d-flex align-items-end">
+                            <div class="w-100 text-white p-3" style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+                                <h4 class="mb-0">Mexican</h4>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-6 fw-bold mb-3">What Our Customers Say</h2>
+            <p class="text-muted">Real experiences from satisfied food lovers</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card h-100 border-0 shadow-sm p-4">
+                    <div class="card-body">
+                        <div class="mb-3 text-warning">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="lead mb-4">"Amazing experience! The food was delicious and the chef was very professional. Will definitely order again!"</p>
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">JS</div>
+                            <div class="ms-3">
+                                <h6 class="mb-0">John Smith</h6>
+                                <small class="text-muted">Food Enthusiast</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100 border-0 shadow-sm p-4">
+                    <div class="card-body">
+                        <div class="mb-3 text-warning">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="lead mb-4">"The attention to detail and quality of ingredients used was impressive. A truly authentic dining experience!"</p>
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">MD</div>
+                            <div class="ms-3">
+                                <h6 class="mb-0">Maria Davis</h6>
+                                <small class="text-muted">Regular Customer</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100 border-0 shadow-sm p-4">
+                    <div class="card-body">
+                        <div class="mb-3 text-warning">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <p class="lead mb-4">"Teka makes it so easy to find amazing home chefs. The variety and quality of food is outstanding!"</p>
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">RP</div>
+                            <div class="ms-3">
+                                <h6 class="mb-0">Robert Parker</h6>
+                                <small class="text-muted">Food Blogger</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8 text-center text-lg-start">
+                <h2 class="display-6 fw-bold text-white mb-3">Ready to Start Cooking?</h2>
+                <p class="lead text-white-50 mb-0">Join our community of talented chefs and share your culinary passion</p>
+            </div>
+            <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
+                <a href="{% url 'chef_portal:register' %}" class="btn btn-light btn-lg">
+                    <i class="fas fa-utensils me-2"></i>Become a Chef
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
                                 <i class="bi bi-person-circle fs-1 text-muted"></i>
                             {% endif %}
                         </div>
@@ -138,203 +328,123 @@
 
 {% block extra_js %}
 <script>
-let userLocation = null;
-
-// Get user's current location
+// Function to get user's location and load nearby chefs
 function findMyLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function(position) {
-                userLocation = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-                loadNearbyChefs(userLocation.lat, userLocation.lng);
+                window.location.href = `{% url 'client_portal:chef_list' %}?lat=${position.coords.latitude}&lng=${position.coords.longitude}`;
             },
             function(error) {
-                console.error('Error getting location:', error);
-                alert('Could not get your location. Please enter your address manually.');
+                console.error("Error getting location:", error);
+                alert("Could not get your location. Please try searching by address instead.");
             }
         );
     } else {
-        alert('Geolocation is not supported by this browser.');
+        alert("Geolocation is not supported by your browser. Please try searching by address instead.");
     }
 }
 
-// Search by entered location
-function searchLocation() {
-    const locationInput = document.getElementById('location-search');
-    const address = locationInput.value.trim();
-    
-    if (!address) {
-        alert('Please enter an address or postal code.');
-        return;
-    }
-    
-    // In a real implementation, you would geocode the address
-    // For now, we'll use a default location
-    loadNearbyChefs(40.7128, -74.0060, address); // NYC coordinates as example
-}
-
-// Load chefs near specified coordinates
-function loadNearbyChefs(lat, lng, searchAddress = null) {
-    const query = `
-        query GetNearbyChefs($lat: Float!, $lng: Float!, $radius: Int) {
-            chefsNearMe(lat: $lat, long: $lng, radius: $radius) {
-                id
-                user {
-                    firstName
-                    lastName
-                    username
-                }
-                bio
-                profilePicture
-                averageRating
-                totalReviews
-                isAvailable
-                distanceKm
-                menuItems {
-                    id
-                    name
-                    category
-                    price
-                }
-            }
-        }
-    `;
-    
-    fetch('/graphql/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken,
-        },
-        body: JSON.stringify({
-            query: query,
-            variables: { lat: lat, lng: lng, radius: 15 }
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.errors) {
-            console.error('GraphQL errors:', data.errors);
-            return;
-        }
-        displayChefs(data.data.chefsNearMe);
-    })
-    .catch(error => {
-        console.error('Error loading chefs:', error);
-        displayNoChefs();
-    });
-}
-
-// Display chefs in the featured section
-function displayChefs(chefs) {
+// Load featured chefs on page load
+document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('featured-chefs');
     
-    if (!chefs || chefs.length === 0) {
-        displayNoChefs();
-        return;
-    }
-    
-    container.innerHTML = chefs.slice(0, 6).map(chef => {
-        const chefName = chef.user.firstName && chef.user.lastName 
-            ? `${chef.user.firstName} ${chef.user.lastName}`
-            : chef.user.username;
-        
-        const cuisines = [...new Set(chef.menuItems.map(item => item.category))].slice(0, 3);
-        
-        return `
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 chef-card" onclick="window.location.href='/chef/${chef.id}/'">
-                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                        ${chef.profilePicture 
-                            ? `<img src="${chef.profilePicture}" alt="${chefName}" class="img-fluid rounded">`
-                            : `<i class="bi bi-person-circle fs-1 text-muted"></i>`
-                        }
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">${chefName}</h5>
-                        <p class="card-text text-muted small">${chef.bio.substring(0, 100)}...</p>
-                        
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                                ${chef.averageRating > 0 
-                                    ? `<span class="text-warning">${'★'.repeat(Math.floor(chef.averageRating))}${'☆'.repeat(5-Math.floor(chef.averageRating))}</span>
-                                       <small class="text-muted">(${chef.totalReviews})</small>`
-                                    : '<small class="text-muted">New chef</small>'
-                                }
-                            </div>
-                            ${chef.distanceKm ? `<small class="text-muted">${chef.distanceKm} km</small>` : ''}
-                        </div>
-                        
-                        <div class="mb-3">
-                            ${cuisines.map(cuisine => 
-                                `<span class="badge bg-secondary me-1">${cuisine.replace('_', ' ')}</span>`
-                            ).join('')}
-                        </div>
-                        
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="badge ${chef.isAvailable ? 'bg-success' : 'bg-danger'}">
+    // Function to display featured chefs
+    function displayChefs(chefs) {
+        if (!chefs || chefs.length === 0) {
+            container.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-utensils fa-3x text-muted mb-3"></i>
+                    <h4>No chefs found in your area</h4>
+                    <p class="text-muted">Try expanding your search radius or check back later!</p>
+                    <a href="{% url 'client_portal:chef_list' %}" class="btn btn-primary">Browse All Chefs</a>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = chefs.slice(0, 6).map(chef => `
+            <div class="col-lg-4 col-md-6">
+                <div class="chef-card card h-100 border-0 shadow-sm" onclick="window.location.href='/chef/${chef.id}/'">
+                    <div class="position-relative">
+                        <img src="${chef.profilePicture || 'https://via.placeholder.com/300x200?text=Chef+Photo'}" 
+                             class="card-img-top" alt="${chef.user.firstName} ${chef.user.lastName}"
+                             style="height: 200px; object-fit: cover;">
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge ${chef.isAvailable ? 'bg-success' : 'bg-secondary'}">
                                 ${chef.isAvailable ? 'Available' : 'Offline'}
                             </span>
-                            <small class="text-muted">${chef.menuItems.length} dishes</small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold mb-1">${chef.user.firstName} ${chef.user.lastName}</h5>
+                        <p class="text-muted small mb-2">
+                            <i class="fas fa-map-marker-alt me-1"></i>${chef.location || 'Location not specified'}
+                        </p>
+                        <p class="card-text text-muted small">${chef.bio ? chef.bio.substring(0, 100) + '...' : ''}</p>
+                        <div class="mb-2">
+                            ${chef.averageRating > 0 
+                                ? `<div class="text-warning mb-1">${'★'.repeat(Math.floor(chef.averageRating))}${'☆'.repeat(5-Math.floor(chef.averageRating))}</div>
+                                   <small class="text-muted">${chef.totalReviews} reviews</small>`
+                                : '<small class="text-muted">New chef</small>'
+                            }
+                        </div>
+                        <div class="d-flex flex-wrap gap-1">
+                            ${(chef.cuisineTypes || []).slice(0, 3).map(cuisine => 
+                                `<span class="badge bg-light text-dark">${cuisine}</span>`
+                            ).join('')}
                         </div>
                     </div>
                 </div>
             </div>
-        `;
-    }).join('');
-}
+        `).join('');
 
-// Display message when no chefs are found
-function displayNoChefs() {
-    const container = document.getElementById('featured-chefs');
-    container.innerHTML = `
-        <div class="col-12 text-center">
-            <i class="bi bi-geo-alt fs-1 text-muted mb-3"></i>
-            <h4>No chefs found in your area</h4>
-            <p class="text-muted">Try expanding your search radius or check back later as we're always adding new chefs!</p>
-            <a href="{% url 'client_portal:chef_list' %}" class="btn btn-primary">View All Chefs</a>
-        </div>
-    `;
-}
-
-// Auto-load chefs on page load (try to get location)
-document.addEventListener('DOMContentLoaded', function() {
-    // Try to get user location automatically, but don't prompt immediately
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                userLocation = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-                loadNearbyChefs(userLocation.lat, userLocation.lng);
-            },
-            function(error) {
-                // If location access is denied, load some default featured chefs
-                console.log('Location access denied, loading default chefs');
-                loadNearbyChefs(40.7128, -74.0060); // Default to NYC
-            },
-            { timeout: 5000, enableHighAccuracy: false }
-        );
-    } else {
-        loadNearbyChefs(40.7128, -74.0060); // Default to NYC
+        // Add animations to chef cards
+        document.querySelectorAll('.chef-card').forEach((card, index) => {
+            card.style.animation = `fadeInUp 0.5s ease-out ${index * 0.1}s forwards`;
+            card.style.opacity = '0';
+        });
     }
+
+    // Fetch and display featured chefs
+    fetch('/api/featured-chefs/')
+        .then(response => response.json())
+        .then(displayChefs)
+        .catch(error => {
+            console.error('Error fetching chefs:', error);
+            container.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">Could not load featured chefs. Please try again later.</p>
+                </div>
+            `;
+        });
 });
 
-// Add hover effects to chef cards
+// Add hover animations to cuisine cards
 document.addEventListener('DOMContentLoaded', function() {
     const style = document.createElement('style');
     style.textContent = `
-        .chef-card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            cursor: pointer;
+        .cuisine-card {
+            transition: all 0.3s ease;
         }
-        .chef-card:hover {
+        .cuisine-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .cuisine-card:hover img {
+            transform: scale(1.05);
+        }
+        .cuisine-card img {
+            transition: transform 0.3s ease;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     `;
     document.head.appendChild(style);
