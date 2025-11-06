@@ -251,80 +251,6 @@
         </div>
     </div>
 </section>
-                                <i class="bi bi-person-circle fs-1 text-muted"></i>
-                            {% endif %}
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">{{ chef.user.get_full_name }}</h5>
-                            <p class="card-text text-muted small">{{ chef.bio|truncatechars:100 }}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge {% if chef.is_available %}bg-success{% else %}bg-danger{% endif %}">
-                                        {% if chef.is_available %}Available{% else %}Offline{% endif %}
-                                    </span>
-                                <small class="text-muted">{{ chef.menu_items.count }} dishes</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            {% else %}
-            <!-- Featured chefs will be loaded here -->
-            <div class="col-12 text-center">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading chefs...</span>
-                </div>
-                <p class="mt-3 text-muted">Finding amazing chefs near you...</p>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-</section>
-
-<!-- How It Works -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="row mb-5">
-            <div class="col text-center">
-                <h2>How Teka Works</h2>
-                <p class="text-muted">Three simple steps to enjoying authentic home-cooked meals</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-4 text-center mb-4">
-                <div class="feature-icon bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                    <i class="bi bi-search fs-3"></i>
-                </div>
-                <h4>Discover</h4>
-                <p class="text-muted">Browse local chefs and their unique menus. Each chef has their own story and specialty dishes.</p>
-            </div>
-            <div class="col-lg-4 text-center mb-4">
-                <div class="feature-icon bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                    <i class="bi bi-cart-check fs-3"></i>
-                </div>
-                <h4>Order</h4>
-                <p class="text-muted">Choose your favorite dishes and place your order. Secure payment and real-time order tracking.</p>
-            </div>
-            <div class="col-lg-4 text-center mb-4">
-                <div class="feature-icon bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                    <i class="bi bi-emoji-smile fs-3"></i>
-                </div>
-                <h4>Enjoy</h4>
-                <p class="text-muted">Receive your freshly prepared meal and enjoy authentic flavors made with love.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- CTA Section -->
-<section class="py-5 bg-primary text-white">
-    <div class="container text-center">
-        <h3 class="mb-3">Ready to taste something amazing?</h3>
-        <p class="lead mb-4">Join thousands of food lovers discovering authentic meals from passionate local chefs.</p>
-        <a href="{% url 'client_portal:register' %}" class="btn btn-light btn-lg me-3">Get Started</a>
-        <a href="{% url 'client_portal:chef_list' %}" class="btn btn-outline-light btn-lg">Browse Chefs</a>
-    </div>
-</section>
-{% endblock %}
 
 {% block extra_js %}
 <script>
@@ -418,10 +344,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
         });
-});
 
-// Add hover animations to cuisine cards
-document.addEventListener('DOMContentLoaded', function() {
+    // Add hover animations to cuisine cards
     const style = document.createElement('style');
     style.textContent = `
         .cuisine-card {
@@ -450,4 +374,5 @@ document.addEventListener('DOMContentLoaded', function() {
     document.head.appendChild(style);
 });
 </script>
+{% endblock %}
 {% endblock %}
