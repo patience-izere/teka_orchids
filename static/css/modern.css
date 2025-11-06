@@ -1,146 +1,355 @@
 /* Modern CSS for Teka Platform */
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --primary-color: #4CAF50; /* A fresh, food-related green */
-    --secondary-color: #FFC107; /* A warm, inviting yellow */
-    --dark-color: #333;
-    --light-color: #f4f4f4;
-    --font-family: 'Poppins', sans-serif;
+    /* Primary Colors */
+    --primary-color: #D94F2B; /* Warm terracotta - symbolizes warmth and hospitality */
+    --secondary-color: #2B4D59; /* Deep navy - professional and trustworthy */
+    --accent-color: #F4B942; /* Golden yellow - represents culinary excellence */
+    
+    /* Neutral Colors */
+    --dark-color: #2C3E50;
+    --text-color: #475569;
+    --light-color: #F8FAFC;
+    --border-color: #E2E8F0;
+    
+    /* UI Colors */
+    --success-color: #34D399;
+    --warning-color: #FBBF24;
+    --danger-color: #EF4444;
+    --info-color: #60A5FA;
+    
+    /* Typography */
+    --heading-font: 'Playfair Display', serif;
+    --body-font: 'Poppins', sans-serif;
 }
 
+/* Base Styles */
 body {
-    font-family: var(--font-family);
+    font-family: var(--body-font);
     background-color: var(--light-color);
-    color: var(--dark-color);
+    color: var(--text-color);
+    line-height: 1.6;
 }
 
 h1, h2, h3, h4, h5, h6 {
+    font-family: var(--heading-font);
+    color: var(--dark-color);
     font-weight: 600;
-    color: var(--primary-color);
+    line-height: 1.3;
 }
 
 a {
     color: var(--primary-color);
     text-decoration: none;
+    transition: all 0.3s ease;
 }
 
 a:hover {
-    color: var(--secondary-color);
+    color: var(--accent-color);
+}
+
+.btn {
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
 .btn-primary {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
+    color: white;
 }
 
 .btn-primary:hover {
-    background-color: #45a049;
-    border-color: #45a049;
+    background-color: #C23D1A;
+    border-color: #C23D1A;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(217, 79, 43, 0.2);
 }
 
 .btn-secondary {
     background-color: var(--secondary-color);
     border-color: var(--secondary-color);
+    color: white;
 }
 
 .btn-secondary:hover {
-    background-color: #ffb300;
-    border-color: #ffb300;
+    background-color: #1A3F4A;
+    border-color: #1A3F4A;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(43, 77, 89, 0.2);
 }
 
 /* Home Page Styles */
 .hero-section {
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center;
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center;
     background-size: cover;
     color: white;
-    padding: 100px 0;
+    padding: 120px 0;
 }
 
 .hero-section h1 {
+    font-family: var(--heading-font);
     font-size: 3.5rem;
     font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .chef-card {
     border: none;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .chef-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .cta-section {
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--secondary-color) 0%, #1A3F4A 100%);
     color: white;
     padding: 80px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h20v20H0z" fill="none"/><circle cx="3" cy="3" r="1" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+    opacity: 0.3;
 }
 
 /* Chef Portal Styles */
 .sidebar {
-    background-color: #fff;
-    border-right: 1px solid #dee2e6;
+    background-color: white;
+    border-right: 1px solid var(--border-color);
     min-height: 100vh;
+    padding: 2rem 0;
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.03);
 }
 
 .sidebar .nav-link {
-    color: #555;
+    color: var(--text-color);
     font-weight: 500;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    margin: 0.25rem 1rem;
+    transition: all 0.3s ease;
 }
 
 .sidebar .nav-link.active,
 .sidebar .nav-link:hover {
     background-color: var(--primary-color);
     color: white;
-    border-radius: 5px;
+    transform: translateX(5px);
 }
 
 .main-content {
-    padding: 30px;
+    padding: 2rem;
+    background-color: var(--light-color);
 }
 
 /* Dashboard Styles */
 .dashboard-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, #FF6B45 100%);
     color: white;
-    padding: 2rem 0;
+    padding: 2.5rem 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
     border-radius: 10px;
 }
 
 .stat-card {
     border: none;
-    border-radius: 10px;
+    border-radius: 15px;
+    padding: 1.5rem;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
     color: white;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%);
+    z-index: -1;
 }
 
 .stat-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
-.revenue-card { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-.orders-card { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-.rating-card { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-.menu-items-card { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+.revenue-card { 
+    background: linear-gradient(135deg, var(--primary-color) 0%, #FF6B45 100%);
+}
+
+.orders-card { 
+    background: linear-gradient(135deg, var(--secondary-color) 0%, #3A6B7E 100%);
+}
+
+.rating-card { 
+    background: linear-gradient(135deg, var(--accent-color) 0%, #FFD166 100%);
+}
+
+.menu-items-card {
+    background: linear-gradient(135deg, var(--success-color) 0%, #10B981 100%);
+}
 
 .quick-action-card {
-    border: 1px solid #dee2e6;
-    border-radius: 10px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: 1.5rem;
     transition: all 0.3s ease;
     cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
 .quick-action-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border-color: var(--primary-color);
 }
 
 .chart-container {
-    position: relative;
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
     height: 300px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+/* Menu Items */
+.menu-item {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.menu-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.menu-item .dish-image {
+    height: 200px;
+    object-fit: cover;
+}
+
+.menu-item .price {
+    color: var(--primary-color);
+    font-family: var(--heading-font);
+    font-weight: 600;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 0.5em 1.5em;
+    border-radius: 25px;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.status-badge.pending {
+    background-color: var(--warning-color);
+    color: var(--dark-color);
+}
+
+.status-badge.completed {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.status-badge.cancelled {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+/* Utility Classes */
+.text-primary { color: var(--primary-color) !important; }
+.text-secondary { color: var(--secondary-color) !important; }
+.text-accent { color: var(--accent-color) !important; }
+
+.bg-primary { background-color: var(--primary-color) !important; }
+.bg-secondary { background-color: var(--secondary-color) !important; }
+.bg-accent { background-color: var(--accent-color) !important; }
+
+.shadow-sm { box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important; }
+.shadow-md { box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; }
+.shadow-lg { box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important; }
+
+.rounded-xl { border-radius: 15px !important; }
+.rounded-2xl { border-radius: 20px !important; }
+
+.transition-all { transition: all 0.3s ease !important; }
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 80px 0;
+    }
+
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+
+    .stat-card {
+        margin-bottom: 1rem;
+    }
+
+    .menu-item .dish-image {
+        height: 150px;
+    }
+}
+
+@media (max-width: 576px) {
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero-section h1 {
+        font-size: 2rem;
+    }
 }
