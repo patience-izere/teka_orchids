@@ -1,0 +1,815 @@
+{% extends 'client_portal/base.html' %}
+{% load static %}
+
+{% block title %}Profile Settings - Teka{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 30px;
+        margin-bottom: 40px;
+        border-radius: 15px;
+        text-align: center;
+    }
+    
+    .profile-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .profile-header {
+        background: #f8f9fa;
+        padding: 25px 30px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .profile-content {
+        padding: 30px;
+    }
+    
+    .avatar-section {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid #007bff;
+        margin-bottom: 20px;
+    }
+    
+    .avatar-upload {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .avatar-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.6);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .avatar-upload:hover .avatar-overlay {
+        opacity: 1;
+    }
+    
+    .avatar-overlay i {
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
+    
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,123,255,0.3);
+    }
+    
+    .btn-outline-danger {
+        border: 2px solid #dc3545;
+        color: #dc3545;
+        background: white;
+        padding: 10px 25px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-danger:hover {
+        background: #dc3545;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+        margin: 30px 0;
+    }
+    
+    .stat-card {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        border-left: 4px solid #007bff;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .preferences-section {
+        margin-top: 30px;
+    }
+    
+    .preference-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .preference-item:last-child {
+        border-bottom: none;
+    }
+    
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+    
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+        background-color: #007bff;
+    }
+    
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+    
+    .danger-zone {
+        border: 2px solid #dc3545;
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 30px;
+        background: #fff5f5;
+    }
+    
+    .danger-zone h5 {
+        color: #dc3545;
+        margin-bottom: 15px;
+    }
+    
+    .address-list {
+        margin: 20px 0;
+    }
+    
+    .address-item {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .address-item.primary {
+        border-left: 4px solid #28a745;
+        background: #f8fff9;
+    }
+    
+    .alert {
+        border-radius: 10px;
+        border: none;
+        padding: 15px 20px;
+    }
+    
+    .modal-content {
+        border-radius: 15px;
+        border: none;
+    }
+    
+    .modal-header {
+        background: #f8f9fa;
+        border-radius: 15px 15px 0 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container profile-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1><i class="bi bi-person-gear me-3"></i>Profile Settings</h1>
+        <p class="lead mb-0">Manage your account and preferences</p>
+    </div>
+    
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+    
+    <!-- Profile Information -->
+    <div class="profile-card">
+        <div class="profile-header">
+            <h4><i class="bi bi-person me-2"></i>Personal Information</h4>
+        </div>
+        <div class="profile-content">
+            <!-- Avatar Section -->
+            <div class="avatar-section">
+                <div class="avatar-upload">
+                    <img src="{% if user.profile_image %}{{ user.profile_image.url }}{% else %}https://via.placeholder.com/120x120/007bff/white?text={{ user.first_name|first|default:'U' }}{% endif %}" 
+                         alt="Profile Picture" class="profile-avatar" id="profile-avatar">
+                    <div class="avatar-overlay" onclick="document.getElementById('avatar-input').click()">
+                        <i class="bi bi-camera"></i>
+                    </div>
+                </div>
+                <input type="file" id="avatar-input" accept="image/*" style="display: none;" onchange="uploadAvatar(this)">
+                <p class="text-muted">Click to change profile picture</p>
+            </div>
+            
+            <!-- Profile Form -->
+            <form method="POST" id="profile-form">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label" for="first_name">
+                                <i class="bi bi-person me-2"></i>First Name
+                            </label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" 
+                                   value="{{ user.first_name }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label" for="last_name">
+                                <i class="bi bi-person me-2"></i>Last Name
+                            </label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" 
+                                   value="{{ user.last_name }}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="email">
+                        <i class="bi bi-envelope me-2"></i>Email Address
+                    </label>
+                    <input type="email" class="form-control" id="email" name="email" 
+                           value="{{ user.email }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="phone_number">
+                        <i class="bi bi-telephone me-2"></i>Phone Number
+                    </label>
+                    <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                           value="{{ user.phone_number|default:'' }}" placeholder="+1 (555) 123-4567">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="username">
+                        <i class="bi bi-at me-2"></i>Username
+                    </label>
+                    <input type="text" class="form-control" id="username" name="username" 
+                           value="{{ user.username }}" readonly>
+                    <small class="text-muted">Username cannot be changed</small>
+                </div>
+                
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Account Statistics -->
+    <div class="profile-card">
+        <div class="profile-header">
+            <h4><i class="bi bi-graph-up me-2"></i>Account Statistics</h4>
+        </div>
+        <div class="profile-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ user.order_set.count }}</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${{ user.order_set.filter.total_spent|default:"0.00" }}</div>
+                    <div class="stat-label">Total Spent</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ user.review_set.count }}</div>
+                    <div class="stat-label">Reviews Written</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ user.date_joined|timesince }}</div>
+                    <div class="stat-label">Member Since</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Saved Addresses -->
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4><i class="bi bi-geo-alt me-2"></i>Saved Addresses</h4>
+                <button class="btn btn-outline-primary btn-sm" onclick="addNewAddress()">
+                    <i class="bi bi-plus me-1"></i>Add Address
+                </button>
+            </div>
+        </div>
+        <div class="profile-content">
+            <div class="address-list" id="address-list">
+                <!-- Addresses will be loaded via JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification Preferences -->
+    <div class="profile-card">
+        <div class="profile-header">
+            <h4><i class="bi bi-bell me-2"></i>Notification Preferences</h4>
+        </div>
+        <div class="profile-content">
+            <div class="preferences-section">
+                <div class="preference-item">
+                    <div>
+                        <strong>Order Updates</strong>
+                        <br><small class="text-muted">Notifications about order status changes</small>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="order-notifications" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="preference-item">
+                    <div>
+                        <strong>Promotional Emails</strong>
+                        <br><small class="text-muted">Special offers and new chef announcements</small>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="promo-notifications" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="preference-item">
+                    <div>
+                        <strong>Chef Recommendations</strong>
+                        <br><small class="text-muted">Personalized chef suggestions based on your preferences</small>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="chef-recommendations" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="preference-item">
+                    <div>
+                        <strong>SMS Notifications</strong>
+                        <br><small class="text-muted">Text messages for urgent order updates</small>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="sms-notifications">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Security Settings -->
+    <div class="profile-card">
+        <div class="profile-header">
+            <h4><i class="bi bi-shield-check me-2"></i>Security & Privacy</h4>
+        </div>
+        <div class="profile-content">
+            <div class="row">
+                <div class="col-md-6">
+                    <button class="btn btn-outline-primary w-100 mb-3" onclick="changePassword()">
+                        <i class="bi bi-key me-2"></i>Change Password
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-outline-secondary w-100 mb-3" onclick="downloadData()">
+                        <i class="bi bi-download me-2"></i>Download My Data
+                    </button>
+                </div>
+            </div>
+            
+            <div class="preference-item">
+                <div>
+                    <strong>Two-Factor Authentication</strong>
+                    <br><small class="text-muted">Add an extra layer of security to your account</small>
+                </div>
+                <button class="btn btn-outline-success btn-sm" onclick="setup2FA()">
+                    <i class="bi bi-shield-plus me-1"></i>Enable
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Danger Zone -->
+    <div class="danger-zone">
+        <h5><i class="bi bi-exclamation-triangle me-2"></i>Danger Zone</h5>
+        <p class="text-muted mb-3">
+            Once you delete your account, there is no going back. Please be certain.
+        </p>
+        <button class="btn btn-outline-danger" onclick="deleteAccount()">
+            <i class="bi bi-trash me-2"></i>Delete Account
+        </button>
+    </div>
+</div>
+
+<!-- Address Modal -->
+<div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addressModalLabel">
+                    <i class="bi bi-geo-alt me-2"></i><span id="address-modal-title">Add New Address</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="address-form">
+                    <input type="hidden" id="address-id">
+                    <div class="form-group">
+                        <label for="address-label" class="form-label">Address Label</label>
+                        <input type="text" class="form-control" id="address-label" 
+                               placeholder="Home, Office, etc." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address-full" class="form-label">Full Address</label>
+                        <textarea class="form-control" id="address-full" rows="3" 
+                                  placeholder="Street address, city, state, ZIP code" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="address-instructions" class="form-label">Delivery Instructions</label>
+                        <textarea class="form-control" id="address-instructions" rows="2" 
+                                  placeholder="Special instructions for delivery..."></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="address-default">
+                        <label class="form-check-label" for="address-default">
+                            Set as default address
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveAddress()">
+                    <i class="bi bi-check-lg me-2"></i>Save Address
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Change Modal -->
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="passwordModalLabel">
+                    <i class="bi bi-key me-2"></i>Change Password
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="password-form">
+                    <div class="form-group">
+                        <label for="current-password" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="current-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="new-password" required>
+                        <small class="text-muted">Password must be at least 8 characters long</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirm-password" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="updatePassword()">
+                    <i class="bi bi-check-lg me-2"></i>Update Password
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Load saved addresses on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadAddresses();
+    loadPreferences();
+});
+
+// Avatar upload
+function uploadAvatar(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const formData = new FormData();
+        formData.append('avatar', file);
+        
+        // Preview image immediately
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('profile-avatar').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        
+        // Upload to server (mock for now)
+        console.log('Uploading avatar...', file.name);
+    }
+}
+
+// Address management
+function loadAddresses() {
+    // Mock addresses - in real app, load from server
+    const addresses = JSON.parse(localStorage.getItem('savedAddresses')) || [
+        {
+            id: 1,
+            label: 'Home',
+            address: '123 Main St, New York, NY 10001',
+            instructions: 'Ring doorbell twice',
+            isDefault: true
+        }
+    ];
+    
+    renderAddresses(addresses);
+}
+
+function renderAddresses(addresses) {
+    const container = document.getElementById('address-list');
+    
+    if (addresses.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center">No saved addresses yet.</p>';
+        return;
+    }
+    
+    let html = '';
+    addresses.forEach(address => {
+        html += `
+        <div class="address-item ${address.isDefault ? 'primary' : ''}">
+            <div>
+                <strong>${address.label}</strong>
+                ${address.isDefault ? '<span class="badge bg-success ms-2">Default</span>' : ''}
+                <br><small class="text-muted">${address.address}</small>
+                ${address.instructions ? '<br><small class="text-info">Note: ' + address.instructions + '</small>' : ''}
+            </div>
+            <div>
+                <button class="btn btn-outline-primary btn-sm me-2" onclick="editAddress(${address.id})">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm" onclick="deleteAddress(${address.id})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function addNewAddress() {
+    document.getElementById('address-modal-title').textContent = 'Add New Address';
+    document.getElementById('address-form').reset();
+    document.getElementById('address-id').value = '';
+    new bootstrap.Modal(document.getElementById('addressModal')).show();
+}
+
+function editAddress(addressId) {
+    // Load address data and populate form
+    document.getElementById('address-modal-title').textContent = 'Edit Address';
+    document.getElementById('address-id').value = addressId;
+    // Populate form fields with existing data...
+    new bootstrap.Modal(document.getElementById('addressModal')).show();
+}
+
+function saveAddress() {
+    const addressData = {
+        id: document.getElementById('address-id').value || Date.now(),
+        label: document.getElementById('address-label').value,
+        address: document.getElementById('address-full').value,
+        instructions: document.getElementById('address-instructions').value,
+        isDefault: document.getElementById('address-default').checked
+    };
+    
+    if (!addressData.label || !addressData.address) {
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    // Save to localStorage (in real app, save to server)
+    let addresses = JSON.parse(localStorage.getItem('savedAddresses')) || [];
+    
+    if (document.getElementById('address-id').value) {
+        // Update existing
+        addresses = addresses.map(addr => 
+            addr.id == addressData.id ? addressData : addr
+        );
+    } else {
+        // Add new
+        addresses.push(addressData);
+    }
+    
+    // If this is set as default, remove default from others
+    if (addressData.isDefault) {
+        addresses = addresses.map(addr => ({
+            ...addr,
+            isDefault: addr.id == addressData.id
+        }));
+    }
+    
+    localStorage.setItem('savedAddresses', JSON.stringify(addresses));
+    renderAddresses(addresses);
+    
+    bootstrap.Modal.getInstance(document.getElementById('addressModal')).hide();
+}
+
+function deleteAddress(addressId) {
+    if (confirm('Are you sure you want to delete this address?')) {
+        let addresses = JSON.parse(localStorage.getItem('savedAddresses')) || [];
+        addresses = addresses.filter(addr => addr.id != addressId);
+        localStorage.setItem('savedAddresses', JSON.stringify(addresses));
+        renderAddresses(addresses);
+    }
+}
+
+// Preference management
+function loadPreferences() {
+    const prefs = JSON.parse(localStorage.getItem('userPreferences')) || {
+        orderNotifications: true,
+        promoNotifications: true,
+        chefRecommendations: true,
+        smsNotifications: false
+    };
+    
+    document.getElementById('order-notifications').checked = prefs.orderNotifications;
+    document.getElementById('promo-notifications').checked = prefs.promoNotifications;
+    document.getElementById('chef-recommendations').checked = prefs.chefRecommendations;
+    document.getElementById('sms-notifications').checked = prefs.smsNotifications;
+    
+    // Add event listeners to save changes
+    document.querySelectorAll('.preferences-section input[type="checkbox"]').forEach(input => {
+        input.addEventListener('change', savePreferences);
+    });
+}
+
+function savePreferences() {
+    const prefs = {
+        orderNotifications: document.getElementById('order-notifications').checked,
+        promoNotifications: document.getElementById('promo-notifications').checked,
+        chefRecommendations: document.getElementById('chef-recommendations').checked,
+        smsNotifications: document.getElementById('sms-notifications').checked
+    };
+    
+    localStorage.setItem('userPreferences', JSON.stringify(prefs));
+}
+
+// Security functions
+function changePassword() {
+    new bootstrap.Modal(document.getElementById('passwordModal')).show();
+}
+
+function updatePassword() {
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        alert('Please fill in all password fields');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        alert('New passwords do not match');
+        return;
+    }
+    
+    if (newPassword.length < 8) {
+        alert('Password must be at least 8 characters long');
+        return;
+    }
+    
+    // Mock password update
+    alert('Password updated successfully!');
+    bootstrap.Modal.getInstance(document.getElementById('passwordModal')).hide();
+    document.getElementById('password-form').reset();
+}
+
+function setup2FA() {
+    alert('Two-factor authentication setup coming soon!');
+}
+
+function downloadData() {
+    alert('Your data download will be prepared and emailed to you within 24 hours.');
+}
+
+function deleteAccount() {
+    if (confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.')) {
+        if (confirm('This will permanently delete all your orders, reviews, and personal data. Type "DELETE" to confirm:')) {
+            // In real app, make API call to delete account
+            alert('Account deletion initiated. You will receive a confirmation email.');
+        }
+    }
+}
+</script>
+{% endblock %}

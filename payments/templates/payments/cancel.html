@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Cancelled - Teka{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cancel-container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 40px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .cancel-icon {
+        width: 80px;
+        height: 80px;
+        background: #dc3545;
+        border-radius: 50%;
+        margin: 0 auto 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 36px;
+    }
+    
+    .order-details {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 10px;
+        margin: 30px 0;
+        text-align: left;
+    }
+    
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .order-item:last-child {
+        border-bottom: none;
+        font-weight: bold;
+    }
+    
+    .btn-group {
+        gap: 15px;
+        margin-top: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="cancel-container">
+        <div class="cancel-icon">
+            <i class="fas fa-times"></i>
+        </div>
+        
+        <h1 class="h2 mb-3 text-danger">Payment Cancelled</h1>
+        <p class="lead mb-4">
+            Your payment was cancelled. Your order is still in your cart and
+            you can complete the payment at any time.
+        </p>
+        
+        <div class="order-details">
+            <h5 class="mb-3">Order Information</h5>
+            <div class="order-item">
+                <span>Order ID:</span>
+                <span class="font-weight-bold">{{ order.id|truncatechars:8 }}</span>
+            </div>
+            <div class="order-item">
+                <span>Chef:</span>
+                <span>{{ order.chef_profile.user.get_full_name }}</span>
+            </div>
+            <div class="order-item">
+                <span>Status:</span>
+                <span class="badge badge-warning">{{ order.get_status_display }}</span>
+            </div>
+            <div class="order-item">
+                <span>Total Amount:</span>
+                <span class="text-primary">${{ order.total_amount }}</span>
+            </div>
+        </div>
+        
+        <div class="alert alert-warning">
+            <i class="fas fa-clock me-2"></i>
+            This order will remain in your account for 24 hours. Complete payment to confirm your order.
+        </div>
+        
+        <div class="btn-group d-flex">
+            <a href="{% url 'client_portal:checkout' order.id %}" class="btn btn-success flex-fill">
+                <i class="fas fa-credit-card me-2"></i>Complete Payment
+            </a>
+            <a href="{% url 'client_portal:home' %}" class="btn btn-outline-secondary flex-fill">
+                <i class="fas fa-home me-2"></i>Back to Home
+            </a>
+        </div>
+        
+        <div class="mt-4">
+            <small class="text-muted">
+                Need help? <a href="{% url 'client_portal:support' %}">Contact Support</a>
+            </small>
+        </div>
+    </div>
+</div>
+{% endblock %}

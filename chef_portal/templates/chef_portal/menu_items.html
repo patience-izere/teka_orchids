@@ -1,0 +1,595 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Menu Management - Teka{% endblock %}
+
+{% block extra_css %}
+<style>
+.menu-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+}
+
+.menu-item-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #dee2e6;
+}
+
+.menu-item-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.category-tabs .nav-link {
+    border-radius: 25px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.category-tabs .nav-link.active {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.add-item-card {
+    border: 2px dashed #dee2e6;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-height: 300px;
+}
+
+.add-item-card:hover {
+    border-color: #667eea;
+    background-color: #f8f9fa;
+}
+
+.status-toggle {
+    cursor: pointer;
+}
+
+.item-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.menu-item-card:hover .item-actions {
+    opacity: 1;
+}
+
+.price-badge {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.drag-handle {
+    cursor: move;
+}
+
+.sortable-ghost {
+    opacity: 0.4;
+}
+
+.bulk-actions {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Menu Header -->
+<section class="menu-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="h2 mb-2">Menu Management</h1>
+                <p class="mb-0">Create, edit, and organize your menu items</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <button class="btn btn-light btn-lg" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                    <i class="fas fa-plus me-2"></i>Add New Item
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container my-5">
+    <!-- Bulk Actions -->
+    <div class="bulk-actions" style="display: none;" id="bulkActions">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <span id="selectedCount">0</span> items selected
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="bulkAction('enable')">Enable Selected</button>
+                <button class="btn btn-warning" onclick="bulkAction('disable')">Disable Selected</button>
+                <button class="btn btn-danger" onclick="bulkAction('delete')">Delete Selected</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="category-tabs mb-4">
+        <ul class="nav nav-pills" id="categoryTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="all-tab" data-bs-toggle="pill" data-bs-target="#all" type="button" role="tab">
+                    All Items <span class="badge bg-light text-dark ms-2">{{ menu_items.count }}</span>
+                </button>
+            </li>
+            {% for category, items in menu_by_category.items %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="{{ category|slugify }}-tab" data-bs-toggle="pill" data-bs-target="#{{ category|slugify }}" type="button" role="tab">
+                    {{ category }} <span class="badge bg-light text-dark ms-2">{{ items|length }}</span>
+                </button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="categoryTabContent">
+        <!-- All Items Tab -->
+        <div class="tab-pane fade show active" id="all" role="tabpanel">
+            <div class="row g-4" id="menuItemsGrid">
+                <!-- Add Item Card -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card add-item-card d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                        <div class="text-center">
+                            <i class="fas fa-plus fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Add New Item</h5>
+                            <p class="text-muted mb-0">Create a new menu item</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Items -->
+                {% for item in menu_items %}
+                <div class="col-lg-4 col-md-6" data-category="{{ item.get_category_display }}">
+                    <div class="card menu-item-card h-100 {% if not item.is_available %}opacity-50{% endif %}">
+                        <div class="position-relative">
+                            {% if item.image %}
+                                <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.name }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-utensils fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Item Actions -->
+                            <div class="item-actions">
+                                <div class="btn-group-vertical">
+                                    <button class="btn btn-sm btn-primary" onclick="editItem('{{ item.id }}')" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary drag-handle" title="Drag to reorder">
+                                        <i class="fas fa-grip-vertical"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Status Badge -->
+                            {% if item.is_available %}
+                                <span class="badge bg-success position-absolute" style="top: 10px; left: 10px;">Available</span>
+                            {% else %}
+                                <span class="badge bg-secondary position-absolute" style="top: 10px; left: 10px;">Unavailable</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input item-checkbox" type="checkbox" value="{{ item.id }}">
+                                <label class="form-check-label fw-bold">{{ item.name }}</label>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-light text-dark">{{ item.get_category_display }}</span>
+                                <span class="price-badge text-success">${{ item.price }}</span>
+                            </div>
+                            
+                            <p class="card-text text-muted">{{ item.description|truncatewords:15 }}</p>
+                            
+                            {% if item.ingredients %}
+                            <div class="mb-2">
+                                <small class="text-muted">
+                                    <strong>Ingredients:</strong> {{ item.ingredients|join:", "|truncatewords:8 }}
+                                </small>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                {% if item.is_vegetarian %}
+                                    <span class="badge bg-success me-1">Vegetarian</span>
+                                {% endif %}
+                                {% if item.is_vegan %}
+                                    <span class="badge bg-success me-1">Vegan</span>
+                                {% endif %}
+                                {% if item.is_gluten_free %}
+                                    <span class="badge bg-info me-1">Gluten Free</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input status-toggle" type="checkbox" 
+                                           id="status{{ item.id }}" {% if item.is_available %}checked{% endif %}
+                                           onchange="toggleItemStatus('{{ item.id }}', this.checked)">
+                                    <label class="form-check-label" for="status{{ item.id }}">
+                                        <small>Available</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editItem('{{ item.id }}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="duplicateItem('{{ item.id }}')">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteItem('{{ item.id }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-utensils fa-4x text-muted mb-4"></i>
+                        <h4>No menu items yet</h4>
+                        <p class="text-muted mb-4">Start building your menu by adding your first dish</p>
+                        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                            <i class="fas fa-plus me-2"></i>Add Your First Item
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Category-specific tabs -->
+        {% for category, items in menu_by_category.items %}
+        <div class="tab-pane fade" id="{{ category|slugify }}" role="tabpanel">
+            <div class="row g-4">
+                {% for item in items %}
+                <!-- Same item card structure as above -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card menu-item-card h-100 {% if not item.is_available %}opacity-50{% endif %}">
+                        <!-- Item content same as above -->
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Add/Edit Item Modal -->
+<div class="modal fade" id="addItemModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="itemModalTitle">Add New Menu Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="itemForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" id="itemId" name="item_id">
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="itemName" class="form-label">Item Name *</label>
+                            <input type="text" class="form-control" id="itemName" name="name" required>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="itemPrice" class="form-label">Price *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="itemPrice" name="price" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="itemCategory" class="form-label">Category *</label>
+                            <select class="form-select" id="itemCategory" name="category" required>
+                                <option value="">Select Category</option>
+                                <option value="appetizer">Appetizer</option>
+                                <option value="main_course">Main Course</option>
+                                <option value="dessert">Dessert</option>
+                                <option value="beverage">Beverage</option>
+                                <option value="side_dish">Side Dish</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="prepTime" class="form-label">Preparation Time (minutes)</label>
+                            <input type="number" class="form-control" id="prepTime" name="preparation_time_minutes" min="1" value="30">
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="itemDescription" class="form-label">Description *</label>
+                            <textarea class="form-control" id="itemDescription" name="description" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="itemIngredients" class="form-label">Ingredients</label>
+                            <input type="text" class="form-control" id="itemIngredients" name="ingredients" 
+                                   placeholder="Comma-separated list of ingredients">
+                            <small class="form-text text-muted">e.g., tomatoes, mozzarella, basil, olive oil</small>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="itemImage" class="form-label">Item Image</label>
+                            <input type="file" class="form-control" id="itemImage" name="image" accept="image/*">
+                            <div id="imagePreview" class="mt-2"></div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="isVegetarian" name="is_vegetarian">
+                                        <label class="form-check-label" for="isVegetarian">Vegetarian</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="isVegan" name="is_vegan">
+                                        <label class="form-check-label" for="isVegan">Vegan</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="isGlutenFree" name="is_gluten_free">
+                                        <label class="form-check-label" for="isGlutenFree">Gluten Free</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="isAvailable" name="is_available" checked>
+                                <label class="form-check-label" for="isAvailable">Available for ordering</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveItemBtn">Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+// Initialize sortable grid
+const menuGrid = document.getElementById('menuItemsGrid');
+if (menuGrid) {
+    new Sortable(menuGrid, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        handle: '.drag-handle',
+        onEnd: function(evt) {
+            // Handle reordering
+            console.log('Item moved from', evt.oldIndex, 'to', evt.newIndex);
+        }
+    });
+}
+
+// Checkbox handling
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('item-checkbox')) {
+        updateBulkActions();
+    }
+});
+
+function updateBulkActions() {
+    const checkboxes = document.querySelectorAll('.item-checkbox:checked');
+    const bulkActions = document.getElementById('bulkActions');
+    const selectedCount = document.getElementById('selectedCount');
+    
+    if (checkboxes.length > 0) {
+        bulkActions.style.display = 'block';
+        selectedCount.textContent = checkboxes.length;
+    } else {
+        bulkActions.style.display = 'none';
+    }
+}
+
+// Item management functions
+function toggleItemStatus(itemId, isAvailable) {
+    fetch('{% url "chef_portal:toggle_item_status" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            item_id: itemId,
+            is_available: isAvailable
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update UI
+            location.reload();
+        } else {
+            alert('Error updating item status');
+        }
+    });
+}
+
+function editItem(itemId) {
+    // Fetch item data and populate modal
+    fetch(`/chef/menu-item/${itemId}/`)
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('itemModalTitle').textContent = 'Edit Menu Item';
+        document.getElementById('itemId').value = itemId;
+        document.getElementById('itemName').value = data.name;
+        document.getElementById('itemPrice').value = data.price;
+        document.getElementById('itemCategory').value = data.category;
+        document.getElementById('itemDescription').value = data.description;
+        document.getElementById('prepTime').value = data.preparation_time_minutes;
+        document.getElementById('itemIngredients').value = data.ingredients ? data.ingredients.join(', ') : '';
+        document.getElementById('isVegetarian').checked = data.is_vegetarian;
+        document.getElementById('isVegan').checked = data.is_vegan;
+        document.getElementById('isGlutenFree').checked = data.is_gluten_free;
+        document.getElementById('isAvailable').checked = data.is_available;
+        
+        // Show modal
+        new bootstrap.Modal(document.getElementById('addItemModal')).show();
+    });
+}
+
+function duplicateItem(itemId) {
+    if (confirm('Create a copy of this item?')) {
+        fetch(`/chef/menu-item/${itemId}/duplicate/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error duplicating item');
+            }
+        });
+    }
+}
+
+function deleteItem(itemId) {
+    if (confirm('Are you sure you want to delete this item?')) {
+        fetch(`/chef/menu-item/${itemId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting item');
+            }
+        });
+    }
+}
+
+function bulkAction(action) {
+    const checkboxes = document.querySelectorAll('.item-checkbox:checked');
+    const itemIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (itemIds.length === 0) return;
+    
+    let confirmMessage = '';
+    switch(action) {
+        case 'enable':
+            confirmMessage = `Enable ${itemIds.length} items?`;
+            break;
+        case 'disable':
+            confirmMessage = `Disable ${itemIds.length} items?`;
+            break;
+        case 'delete':
+            confirmMessage = `Delete ${itemIds.length} items? This cannot be undone.`;
+            break;
+    }
+    
+    if (confirm(confirmMessage)) {
+        fetch('/chef/menu-items/bulk-action/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: action,
+                item_ids: itemIds
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error performing bulk action');
+            }
+        });
+    }
+}
+
+// Form submission
+document.getElementById('itemForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const isEdit = document.getElementById('itemId').value !== '';
+    const url = isEdit ? '/chef/menu-item/edit/' : '/chef/menu-item/add/';
+    
+    fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            bootstrap.Modal.getInstance(document.getElementById('addItemModal')).hide();
+            location.reload();
+        } else {
+            alert('Error saving item: ' + (data.error || 'Unknown error'));
+        }
+    });
+});
+
+// Image preview
+document.getElementById('itemImage').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('imagePreview');
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" class="img-thumbnail" style="max-width: 200px;">`;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.innerHTML = '';
+    }
+});
+
+// Reset modal when closed
+document.getElementById('addItemModal').addEventListener('hidden.bs.modal', function() {
+    document.getElementById('itemForm').reset();
+    document.getElementById('itemId').value = '';
+    document.getElementById('itemModalTitle').textContent = 'Add New Menu Item';
+    document.getElementById('imagePreview').innerHTML = '';
+});
+</script>
+{% endblock %}

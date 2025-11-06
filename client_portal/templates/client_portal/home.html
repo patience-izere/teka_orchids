@@ -1,0 +1,65 @@
+{% extends 'client_portal/base.html' %}
+{% load static %}
+
+{% block title %}Teka - Authentic Home-Cooked Meals{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section text-center text-white">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Discover Authentic Home-Cooked Meals</h1>
+        <p class="fs-5">Made with love by talented chefs in your community.</p>
+        <a href="{% url 'client_portal:chef_list' %}" class="btn btn-primary btn-lg">Explore Chefs</a>
+    </div>
+</div>
+
+<!-- Featured Chefs Section -->
+<div class="container py-5">
+    <h2 class="text-center mb-5">Featured Chefs</h2>
+    <div class="row">
+        <!-- Chef Card 1 -->
+        <div class="col-md-4 mb-4">
+            <div class="card chef-card h-100 text-center">
+                <img src="https://via.placeholder.com/150" class="card-img-top" alt="Chef 1">
+                <div class="card-body">
+                    <h5 class="card-title">Chef Jane Doe</h5>
+                    <p class="card-text">Specializing in authentic Italian cuisine.</p>
+                    <a href="#" class="btn btn-outline-primary">View Profile</a>
+                </div>
+            </div>
+        </div>
+        <!-- Chef Card 2 -->
+        <div class="col-md-4 mb-4">
+            <div class="card chef-card h-100 text-center">
+                <img src="https://via.placeholder.com/150" class="card-img-top" alt="Chef 2">
+                <div class="card-body">
+                    <h5 class="card-title">Chef John Smith</h5>
+                    <p class="card-text">Master of spicy and flavorful Mexican dishes.</p>
+                    <a href="#" class="btn btn-outline-primary">View Profile</a>
+                </div>
+            </div>
+        </div>
+        <!-- Chef Card 3 -->
+        <div class="col-md-4 mb-4">
+            <div class="card chef-card h-100 text-center">
+                <img src="https://via.placeholder.com/150" class="card-img-top" alt="Chef 3">
+                <div class="card-body">
+                    <h5 class="card-title">Chef Emily White</h5>
+                    <p class="card-text">Exquisite French pastries and desserts.</p>
+                    <a href="#" class="btn btn-outline-primary">View Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action Section -->
+<div class="cta-section text-center text-white">
+    <div class="container">
+        <h2 class="display-5">Ready to Join?</h2>
+        <p class="fs-5">Sign up as a chef or a customer and be part of our community.</p>
+        <a href="{% url 'client_portal:register' %}" class="btn btn-light btn-lg me-2">Sign Up</a>
+        <a href="{% url 'chef_portal:register' %}" class="btn btn-outline-light btn-lg">Become a Chef</a>
+    </div>
+</div>
+{% endblock %}

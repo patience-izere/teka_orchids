@@ -1,0 +1,146 @@
+/* Modern CSS for Teka Platform */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #4CAF50; /* A fresh, food-related green */
+    --secondary-color: #FFC107; /* A warm, inviting yellow */
+    --dark-color: #333;
+    --light-color: #f4f4f4;
+    --font-family: 'Poppins', sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--light-color);
+    color: var(--dark-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--secondary-color);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #45a049;
+    border-color: #45a049;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.btn-secondary:hover {
+    background-color: #ffb300;
+    border-color: #ffb300;
+}
+
+/* Home Page Styles */
+.hero-section {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center;
+    background-size: cover;
+    color: white;
+    padding: 100px 0;
+}
+
+.hero-section h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+}
+
+.chef-card {
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chef-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.cta-section {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 80px 0;
+}
+
+/* Chef Portal Styles */
+.sidebar {
+    background-color: #fff;
+    border-right: 1px solid #dee2e6;
+    min-height: 100vh;
+}
+
+.sidebar .nav-link {
+    color: #555;
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 5px;
+}
+
+.main-content {
+    padding: 30px;
+}
+
+/* Dashboard Styles */
+.dashboard-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+    border-radius: 10px;
+}
+
+.stat-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    color: white;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.revenue-card { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.orders-card { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.rating-card { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+.menu-items-card { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+.quick-action-card {
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}

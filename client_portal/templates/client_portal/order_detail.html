@@ -1,0 +1,572 @@
+{% extends 'client_portal/base.html' %}
+{% load static %}
+
+{% block title %}Order Details - Teka{% endblock %}
+
+{% block extra_css %}
+<style>
+    .order-detail-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+    
+    .order-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .order-status-timeline {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .timeline-step {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        position: relative;
+    }
+    
+    .timeline-step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 20px;
+        top: 40px;
+        height: 30px;
+        width: 2px;
+        background: #e9ecef;
+    }
+    
+    .timeline-step.completed::after {
+        background: #28a745;
+    }
+    
+    .step-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        z-index: 1;
+    }
+    
+    .step-icon.completed {
+        background: #28a745;
+        color: white;
+    }
+    
+    .step-icon.current {
+        background: #007bff;
+        color: white;
+    }
+    
+    .step-icon.pending {
+        background: #e9ecef;
+        color: #6c757d;
+    }
+    
+    .order-summary {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .chef-card {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .chef-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    
+    .item-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        object-fit: cover;
+        margin-right: 15px;
+    }
+    
+    .price-breakdown {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+    }
+    
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    
+    .price-row.total {
+        font-weight: bold;
+        font-size: 1.1em;
+        color: #007bff;
+        border-top: 2px solid #dee2e6;
+        padding-top: 10px;
+        margin-top: 15px;
+    }
+    
+    .delivery-info {
+        background: #e7f3ff;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid #007bff;
+        margin: 20px 0;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 30px;
+    }
+    
+    .btn-action {
+        flex: 1;
+        min-width: 150px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+    
+    .review-section {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-top: 30px;
+    }
+    
+    .star-rating {
+        font-size: 1.5em;
+        color: #ffc107;
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container order-detail-container">
+    <!-- Order Header -->
+    <div class="order-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1><i class="bi bi-receipt me-3"></i>Order Details</h1>
+                <p class="mb-2">Order ID: <code>#{{ order.id|truncatechars:8 }}</code></p>
+                <p class="mb-0">Placed on {{ order.created_at|date:"M d, Y - H:i A" }}</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                {% if order.status == 'pending' %}
+                    <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                        <i class="bi bi-clock me-2"></i>Pending Payment
+                    </span>
+                {% elif order.status == 'confirmed' %}
+                    <span class="badge bg-info fs-6 px-3 py-2">
+                        <i class="bi bi-check-circle me-2"></i>Confirmed
+                    </span>
+                {% elif order.status == 'preparing' %}
+                    <span class="badge bg-primary fs-6 px-3 py-2">
+                        <i class="bi bi-fire me-2"></i>Preparing
+                    </span>
+                {% elif order.status == 'ready' %}
+                    <span class="badge bg-success fs-6 px-3 py-2">
+                        <i class="bi bi-bag-check me-2"></i>Ready
+                    </span>
+                {% elif order.status == 'delivered' %}
+                    <span class="badge bg-success fs-6 px-3 py-2">
+                        <i class="bi bi-check2-all me-2"></i>Delivered
+                    </span>
+                {% elif order.status == 'cancelled' %}
+                    <span class="badge bg-danger fs-6 px-3 py-2">
+                        <i class="bi bi-x-circle me-2"></i>Cancelled
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Order Status Timeline -->
+            <div class="order-status-timeline">
+                <h4 class="mb-4"><i class="bi bi-clock-history me-2"></i>Order Progress</h4>
+                
+                <div class="timeline-step {% if order.status != 'pending' %}completed{% elif order.status == 'pending' %}current{% else %}pending{% endif %}">
+                    <div class="step-icon {% if order.status != 'pending' %}completed{% elif order.status == 'pending' %}current{% else %}pending{% endif %}">
+                        <i class="bi bi-cart-check"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">Order Placed</h6>
+                        <small class="text-muted">{{ order.created_at|date:"M d, Y - H:i A" }}</small>
+                    </div>
+                </div>
+                
+                <div class="timeline-step {% if order.status in 'confirmed,preparing,ready,delivered' %}completed{% elif order.status == 'confirmed' %}current{% else %}pending{% endif %}">
+                    <div class="step-icon {% if order.status in 'confirmed,preparing,ready,delivered' %}completed{% elif order.status == 'confirmed' %}current{% else %}pending{% endif %}">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">Order Confirmed</h6>
+                        <small class="text-muted">
+                            {% if order.confirmed_at %}
+                                {{ order.confirmed_at|date:"M d, Y - H:i A" }}
+                            {% else %}
+                                Pending confirmation
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="timeline-step {% if order.status in 'preparing,ready,delivered' %}completed{% elif order.status == 'preparing' %}current{% else %}pending{% endif %}">
+                    <div class="step-icon {% if order.status in 'preparing,ready,delivered' %}completed{% elif order.status == 'preparing' %}current{% else %}pending{% endif %}">
+                        <i class="bi bi-fire"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">Preparing Your Meal</h6>
+                        <small class="text-muted">Chef is cooking your order</small>
+                    </div>
+                </div>
+                
+                <div class="timeline-step {% if order.status in 'ready,delivered' %}completed{% elif order.status == 'ready' %}current{% else %}pending{% endif %}">
+                    <div class="step-icon {% if order.status in 'ready,delivered' %}completed{% elif order.status == 'ready' %}current{% else %}pending{% endif %}">
+                        <i class="bi bi-bag-check"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">Ready for Delivery</h6>
+                        <small class="text-muted">
+                            {% if order.estimated_delivery_time %}
+                                Est. delivery: {{ order.estimated_delivery_time|date:"H:i A" }}
+                            {% else %}
+                                Will be delivered soon
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="timeline-step {% if order.status == 'delivered' %}completed{% else %}pending{% endif %}">
+                    <div class="step-icon {% if order.status == 'delivered' %}completed{% else %}pending{% endif %}">
+                        <i class="bi bi-truck"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">Delivered</h6>
+                        <small class="text-muted">
+                            {% if order.completed_at %}
+                                {{ order.completed_at|date:"M d, Y - H:i A" }}
+                            {% else %}
+                                Pending delivery
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chef Information -->
+            <div class="chef-card">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <img src="{% if order.chef_profile.profile_picture %}{{ order.chef_profile.profile_picture.url }}{% else %}https://via.placeholder.com/80x80/007bff/white?text={{ order.chef_profile.user.first_name|first }}{% endif %}" 
+                             alt="{{ order.chef_profile.user.get_full_name }}" class="chef-avatar">
+                    </div>
+                    <div class="col">
+                        <h5 class="mb-1">{{ order.chef_profile.user.get_full_name }}</h5>
+                        <p class="text-muted mb-2">{{ order.chef_profile.bio|truncatechars:100 }}</p>
+                        <div class="d-flex align-items-center">
+                            <div class="star-rating me-3">
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= order.chef_profile.average_rating %}
+                                        <i class="bi bi-star-fill"></i>
+                                    {% else %}
+                                        <i class="bi bi-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="ms-2 text-muted">({{ order.chef_profile.total_reviews }} reviews)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{% url 'client_portal:chef_detail' order.chef_profile.id %}" class="btn btn-outline-primary">
+                            <i class="bi bi-person me-2"></i>View Chef
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <h4 class="mb-4"><i class="bi bi-list-check me-2"></i>Order Summary</h4>
+                
+                <!-- Order Items -->
+                {% for item in order_items %}
+                <div class="order-item">
+                    <div class="d-flex">
+                        <img src="{% if item.menu_item.image %}{{ item.menu_item.image.url }}{% else %}https://via.placeholder.com/60x60/28a745/white?text=🍽️{% endif %}" 
+                             alt="{{ item.menu_item.name }}" class="item-image">
+                        <div>
+                            <h6 class="mb-1">{{ item.menu_item.name }}</h6>
+                            <small class="text-muted">
+                                Qty: {{ item.quantity }} × ${{ item.price }}
+                            </small>
+                            {% if item.special_instructions %}
+                            <br><small class="text-info">Note: {{ item.special_instructions }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <strong>${{ item.subtotal }}</strong>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <!-- Price Breakdown -->
+                <div class="price-breakdown">
+                    <div class="price-row">
+                        <span>Subtotal:</span>
+                        <span>${{ order.subtotal }}</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Delivery Fee:</span>
+                        <span>${{ order.delivery_fee }}</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Platform Fee:</span>
+                        <span>${{ order.platform_fee }}</span>
+                    </div>
+                    <div class="price-row total">
+                        <span>Total:</span>
+                        <span>${{ order.total_amount }}</span>
+                    </div>
+                </div>
+                
+                <!-- Delivery Information -->
+                <div class="delivery-info">
+                    <h6><i class="bi bi-geo-alt me-2"></i>Delivery Details</h6>
+                    <p class="mb-2">
+                        <strong>Address:</strong><br>
+                        {{ order.delivery_address }}
+                    </p>
+                    {% if order.delivery_instructions %}
+                    <p class="mb-2">
+                        <strong>Instructions:</strong><br>
+                        {{ order.delivery_instructions }}
+                    </p>
+                    {% endif %}
+                    {% if order.estimated_delivery_time %}
+                    <p class="mb-0">
+                        <strong>Estimated Delivery:</strong><br>
+                        {{ order.estimated_delivery_time|date:"M d, Y - H:i A" }}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    {% if order.status == 'pending' %}
+                    <a href="{% url 'client_portal:checkout' order.id %}" class="btn btn-success btn-action">
+                        <i class="bi bi-credit-card me-2"></i>Complete Payment
+                    </a>
+                    {% endif %}
+                    
+                    {% if order.status in 'pending,confirmed' %}
+                    <button class="btn btn-outline-danger btn-action" onclick="cancelOrder('{{ order.id }}')">
+                        <i class="bi bi-x-lg me-2"></i>Cancel Order
+                    </button>
+                    {% endif %}
+                    
+                    {% if order.status == 'delivered' and can_review %}
+                    <button class="btn btn-warning btn-action" onclick="openReviewModal('{{ order.id }}')">
+                        <i class="bi bi-star me-2"></i>Leave Review
+                    </button>
+                    {% endif %}
+                    
+                    <a href="{% url 'client_portal:order_history' %}" class="btn btn-outline-secondary btn-action">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Review Section (if review exists) -->
+    {% for review in order.review_set.all %}
+    <div class="review-section">
+        <h4 class="mb-3"><i class="bi bi-chat-quote me-2"></i>Your Review</h4>
+        <div class="star-rating">
+            {% for i in "12345"|make_list %}
+                {% if forloop.counter <= review.rating %}
+                    <i class="bi bi-star-fill"></i>
+                {% else %}
+                    <i class="bi bi-star"></i>
+                {% endif %}
+            {% endfor %}
+            <span class="ms-2 text-muted">{{ review.rating }}/5 stars</span>
+        </div>
+        <p class="mb-2">{{ review.comment }}</p>
+        <small class="text-muted">Reviewed on {{ review.created_at|date:"M d, Y" }}</small>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Review Modal (same as in order_history.html) -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reviewModalLabel">
+                    <i class="bi bi-star me-2"></i>Leave a Review
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reviewForm">
+                    <input type="hidden" id="orderId" name="order_id">
+                    
+                    <div class="mb-3">
+                        <label for="rating" class="form-label">Rating</label>
+                        <div id="starRating" class="star-rating">
+                            <i class="bi bi-star" data-rating="1"></i>
+                            <i class="bi bi-star" data-rating="2"></i>
+                            <i class="bi bi-star" data-rating="3"></i>
+                            <i class="bi bi-star" data-rating="4"></i>
+                            <i class="bi bi-star" data-rating="5"></i>
+                        </div>
+                        <input type="hidden" id="rating" name="rating" value="5">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="comment" class="form-label">Your Review</label>
+                        <textarea class="form-control" id="comment" name="comment" rows="4" 
+                                  placeholder="Tell us about your experience..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitReview()">
+                    <i class="bi bi-send me-2"></i>Submit Review
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Review Modal Functions (same as order_history.html)
+function openReviewModal(orderId) {
+    document.getElementById('orderId').value = orderId;
+    new bootstrap.Modal(document.getElementById('reviewModal')).show();
+}
+
+// Star Rating System
+document.querySelectorAll('#starRating i').forEach(star => {
+    star.addEventListener('click', function() {
+        const rating = this.dataset.rating;
+        document.getElementById('rating').value = rating;
+        
+        // Update star display
+        document.querySelectorAll('#starRating i').forEach((s, index) => {
+            if (index < rating) {
+                s.className = 'bi bi-star-fill text-warning';
+            } else {
+                s.className = 'bi bi-star';
+            }
+        });
+    });
+});
+
+// Submit Review
+async function submitReview() {
+    const formData = new FormData(document.getElementById('reviewForm'));
+    
+    try {
+        const response = await fetch('{% url "client_portal:ajax_submit_review" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            bootstrap.Modal.getInstance(document.getElementById('reviewModal')).hide();
+            location.reload(); // Refresh to show updated UI
+        } else {
+            alert('Error submitting review: ' + data.error);
+        }
+    } catch (error) {
+        alert('Network error. Please try again.');
+    }
+}
+
+// Cancel Order Function
+async function cancelOrder(orderId) {
+    if (confirm('Are you sure you want to cancel this order?')) {
+        try {
+            const response = await fetch('/ajax/cancel-order/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({ order_id: orderId })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error cancelling order: ' + data.error);
+            }
+        } catch (error) {
+            alert('Network error. Please try again.');
+        }
+    }
+}
+</script>
+{% endblock %}

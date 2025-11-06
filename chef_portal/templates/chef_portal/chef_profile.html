@@ -1,0 +1,1014 @@
+{% extends 'chef_portal/base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Chef Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+    
+    .profile-content {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .profile-sidebar {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        padding: 30px;
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+    }
+    
+    .profile-avatar {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .avatar-container {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+    
+    .avatar-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 5px solid #f8f9fa;
+        object-fit: cover;
+        background: linear-gradient(45deg, #6f42c1, #5a2d91);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: white;
+    }
+    
+    .avatar-upload {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: #007bff;
+        color: white;
+        border: 3px solid white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    
+    .avatar-upload:hover {
+        background: #0056b3;
+        transform: scale(1.1);
+    }
+    
+    .chef-stats {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .stat-item:last-child {
+        border-bottom: none;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .stat-value {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .chef-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .chef-badge {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .profile-main {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .form-tabs {
+        display: flex;
+        border-bottom: 1px solid #dee2e6;
+        background: #f8f9fa;
+    }
+    
+    .form-tab {
+        padding: 20px 25px;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        color: #666;
+        flex: 1;
+        text-align: center;
+    }
+    
+    .form-tab:hover,
+    .form-tab.active {
+        background: white;
+        color: #6f42c1;
+        border-bottom-color: #6f42c1;
+    }
+    
+    .form-content {
+        padding: 30px;
+    }
+    
+    .tab-pane {
+        display: none;
+    }
+    
+    .tab-pane.active {
+        display: block;
+    }
+    
+    .form-section {
+        margin-bottom: 40px;
+    }
+    
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #6f42c1;
+        box-shadow: 0 0 0 0.2rem rgba(111,66,193,0.25);
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+    
+    .form-control.is-valid {
+        border-color: #28a745;
+    }
+    
+    .textarea-tall {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .specialties-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 15px 0;
+    }
+    
+    .specialty-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .specialty-item:hover {
+        border-color: #6f42c1;
+        background: #f3e5f5;
+    }
+    
+    .specialty-item input:checked + label {
+        color: #6f42c1;
+        font-weight: 600;
+    }
+    
+    .availability-grid {
+        display: grid;
+        gap: 15px;
+        margin: 20px 0;
+    }
+    
+    .day-row {
+        display: grid;
+        grid-template-columns: 100px 1fr 1fr 80px;
+        gap: 15px;
+        align-items: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .day-label {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .time-input {
+        padding: 8px 12px;
+        border: 2px solid #e9ecef;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+    
+    .day-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .toggle-switch {
+        position: relative;
+        width: 50px;
+        height: 24px;
+        background: #ccc;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    
+    .toggle-switch.active {
+        background: #28a745;
+    }
+    
+    .toggle-slider {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+    }
+    
+    .toggle-switch.active .toggle-slider {
+        transform: translateX(26px);
+    }
+    
+    .social-links {
+        display: grid;
+        gap: 15px;
+        margin: 20px 0;
+    }
+    
+    .social-item {
+        display: grid;
+        grid-template-columns: 40px 1fr;
+        gap: 15px;
+        align-items: center;
+    }
+    
+    .social-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .social-facebook { background: #3b5998; }
+    .social-instagram { background: #e4405f; }
+    .social-twitter { background: #1da1f2; }
+    .social-linkedin { background: #0077b5; }
+    .social-website { background: #6c757d; }
+    
+    .form-actions {
+        background: #f8f9fa;
+        padding: 25px 30px;
+        margin: 0 -30px -30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-action {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-primary {
+        background: #6f42c1;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #5a2d91;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(111,66,193,0.3);
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #545b62;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        background: #c82333;
+    }
+    
+    .success-message {
+        background: #d4edda;
+        color: #155724;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .error-message {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #f5c6cb;
+    }
+    
+    @media (max-width: 1024px) {
+        .profile-content {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .profile-sidebar {
+            position: static;
+        }
+        
+        .form-tabs {
+            flex-direction: column;
+        }
+        
+        .form-tab {
+            text-align: left;
+        }
+        
+        .day-row {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .profile-header {
+            text-align: center;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .social-item {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="profile-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1><i class="bi bi-person-gear me-3"></i>Edit Profile</h1>
+                <p class="lead mb-0">Customize your chef profile and business information</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'chef_portal:dashboard' %}" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="profile-content">
+        <!-- Sidebar -->
+        <div class="profile-sidebar">
+            <div class="profile-avatar">
+                <div class="avatar-container">
+                    <div class="avatar-image">
+                        {% if chef_profile.profile_picture %}
+                            <img src="{{ chef_profile.profile_picture.url }}" alt="Profile Picture" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                        {% else %}
+                            👨‍🍳
+                        {% endif %}
+                    </div>
+                    <label for="avatar-upload" class="avatar-upload">
+                        <i class="bi bi-camera"></i>
+                    </label>
+                    <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                </div>
+                <h5>{{ chef_profile.business_name|default:user.get_full_name }}</h5>
+                <p class="text-muted">{{ chef_profile.cuisine_type|default:"Chef" }}</p>
+            </div>
+            
+            <div class="chef-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Menu Items</span>
+                    <span class="stat-value">{{ chef_profile.menu_items.count }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Orders</span>
+                    <span class="stat-value">{{ total_orders|default:"0" }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Rating</span>
+                    <span class="stat-value">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= chef_profile.average_rating|floatformat:0 %}
+                                ⭐
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        {% endfor %}
+                        ({{ chef_profile.average_rating|floatformat:1|default:"New" }})
+                    </span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Member Since</span>
+                    <span class="stat-value">{{ user.date_joined|date:"M Y" }}</span>
+                </div>
+            </div>
+            
+            <div class="chef-badges">
+                {% if chef_profile.is_verified %}
+                    <span class="chef-badge">✅ Verified</span>
+                {% endif %}
+                {% if chef_profile.is_featured %}
+                    <span class="chef-badge">⭐ Featured</span>
+                {% endif %}
+                <span class="chef-badge">👨‍🍳 Chef</span>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="profile-main">
+            <div class="form-tabs">
+                <div class="form-tab active" data-tab="basic-info">
+                    <i class="bi bi-person me-2"></i>Basic Info
+                </div>
+                <div class="form-tab" data-tab="business-details">
+                    <i class="bi bi-shop me-2"></i>Business Details
+                </div>
+                <div class="form-tab" data-tab="availability">
+                    <i class="bi bi-clock me-2"></i>Availability
+                </div>
+                <div class="form-tab" data-tab="social-media">
+                    <i class="bi bi-share me-2"></i>Social Media
+                </div>
+            </div>
+            
+            <div class="form-content">
+                <form id="profileForm" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Basic Info Tab -->
+                    <div class="tab-pane active" id="basic-info">
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="bi bi-person-badge"></i>
+                                Personal Information
+                            </h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="first_name" class="form-label">First Name *</label>
+                                    <input type="text" id="first_name" name="first_name" class="form-control" 
+                                           value="{{ user.first_name }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="last_name" class="form-label">Last Name *</label>
+                                    <input type="text" id="last_name" name="last_name" class="form-control" 
+                                           value="{{ user.last_name }}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="email" class="form-label">Email Address *</label>
+                                    <input type="email" id="email" name="email" class="form-control" 
+                                           value="{{ user.email }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="phone" class="form-label">Phone Number</label>
+                                    <input type="tel" id="phone" name="phone" class="form-control" 
+                                           value="{{ chef_profile.phone_number }}">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="bio" class="form-label">Chef Biography</label>
+                                <textarea id="bio" name="bio" class="form-control textarea-tall" 
+                                          placeholder="Tell customers about your culinary journey, experience, and what makes your cooking special...">{{ chef_profile.bio }}</textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="bi bi-award"></i>
+                                Culinary Specialties
+                            </h3>
+                            
+                            <div class="specialties-grid">
+                                {% for specialty in available_specialties %}
+                                <div class="specialty-item">
+                                    <input type="checkbox" id="specialty-{{ specialty.id }}" name="specialties" 
+                                           value="{{ specialty.id }}" class="form-check-input me-2"
+                                           {% if specialty in chef_profile.specialties.all %}checked{% endif %}>
+                                    <label for="specialty-{{ specialty.id }}" class="form-check-label">
+                                        {{ specialty.name }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Business Details Tab -->
+                    <div class="tab-pane" id="business-details">
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="bi bi-shop-window"></i>
+                                Business Information
+                            </h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="business_name" class="form-label">Business Name</label>
+                                    <input type="text" id="business_name" name="business_name" class="form-control" 
+                                           value="{{ chef_profile.business_name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cuisine_type" class="form-label">Primary Cuisine Type</label>
+                                    <select id="cuisine_type" name="cuisine_type" class="form-control">
+                                        <option value="">Select Cuisine Type</option>
+                                        <option value="american" {% if chef_profile.cuisine_type == 'american' %}selected{% endif %}>American</option>
+                                        <option value="italian" {% if chef_profile.cuisine_type == 'italian' %}selected{% endif %}>Italian</option>
+                                        <option value="mexican" {% if chef_profile.cuisine_type == 'mexican' %}selected{% endif %}>Mexican</option>
+                                        <option value="chinese" {% if chef_profile.cuisine_type == 'chinese' %}selected{% endif %}>Chinese</option>
+                                        <option value="indian" {% if chef_profile.cuisine_type == 'indian' %}selected{% endif %}>Indian</option>
+                                        <option value="japanese" {% if chef_profile.cuisine_type == 'japanese' %}selected{% endif %}>Japanese</option>
+                                        <option value="thai" {% if chef_profile.cuisine_type == 'thai' %}selected{% endif %}>Thai</option>
+                                        <option value="french" {% if chef_profile.cuisine_type == 'french' %}selected{% endif %}>French</option>
+                                        <option value="mediterranean" {% if chef_profile.cuisine_type == 'mediterranean' %}selected{% endif %}>Mediterranean</option>
+                                        <option value="fusion" {% if chef_profile.cuisine_type == 'fusion' %}selected{% endif %}>Fusion</option>
+                                        <option value="other" {% if chef_profile.cuisine_type == 'other' %}selected{% endif %}>Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="address" class="form-label">Business Address</label>
+                                <textarea id="address" name="address" class="form-control" rows="3" 
+                                          placeholder="Enter your business or service address">{{ chef_profile.address }}</textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="delivery_radius" class="form-label">Delivery Radius (miles)</label>
+                                    <input type="number" id="delivery_radius" name="delivery_radius" class="form-control" 
+                                           min="0" max="50" step="0.5" value="{{ chef_profile.delivery_radius }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="min_order" class="form-label">Minimum Order Amount ($)</label>
+                                    <input type="number" id="min_order" name="min_order" class="form-control" 
+                                           min="0" step="0.01" value="{{ chef_profile.minimum_order }}">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="business_description" class="form-label">Business Description</label>
+                                <textarea id="business_description" name="business_description" class="form-control textarea-tall" 
+                                          placeholder="Describe your business, services, and what makes you unique...">{{ chef_profile.business_description }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Availability Tab -->
+                    <div class="tab-pane" id="availability">
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="bi bi-calendar3"></i>
+                                Operating Hours
+                            </h3>
+                            
+                            <div class="availability-grid">
+                                {% for day in weekdays %}
+                                <div class="day-row">
+                                    <div class="day-label">{{ day.name }}</div>
+                                    <input type="time" name="open_{{ day.code }}" class="time-input" 
+                                           value="{{ day.open_time|default:'09:00' }}">
+                                    <input type="time" name="close_{{ day.code }}" class="time-input" 
+                                           value="{{ day.close_time|default:'21:00' }}">
+                                    <div class="day-toggle">
+                                        <div class="toggle-switch {% if day.is_open %}active{% endif %}" 
+                                             onclick="toggleDay('{{ day.code }}', this)">
+                                            <div class="toggle-slider"></div>
+                                        </div>
+                                        <input type="hidden" name="active_{{ day.code }}" 
+                                               value="{{ day.is_open|yesno:'true,false' }}">
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="bi bi-clock-history"></i>
+                                Service Settings
+                            </h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="prep_time" class="form-label">Average Preparation Time (minutes)</label>
+                                    <input type="number" id="prep_time" name="prep_time" class="form-control" 
+                                           min="15" max="180" value="{{ chef_profile.average_prep_time|default:'30' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="advance_booking" class="form-label">Advance Booking Hours</label>
+                                    <input type="number" id="advance_booking" name="advance_booking" class="form-control" 
+                                           min="1" max="72" value="{{ chef_profile.advance_booking_hours|default:'2' }}">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="accepts_orders" name="accepts_orders" 
+                                           {% if chef_profile.accepts_orders %}checked{% endif %}>
+                                    <label class="form-check-label" for="accepts_orders">
+                                        Currently accepting new orders
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Social Media Tab -->
+                    <div class="tab-pane" id="social-media">
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="bi bi-globe2"></i>
+                                Social Media & Website
+                            </h3>
+                            
+                            <div class="social-links">
+                                <div class="social-item">
+                                    <div class="social-icon social-website">
+                                        <i class="bi bi-globe"></i>
+                                    </div>
+                                    <input type="url" name="website" class="form-control" 
+                                           placeholder="https://yourwebsite.com" value="{{ chef_profile.website }}">
+                                </div>
+                                
+                                <div class="social-item">
+                                    <div class="social-icon social-facebook">
+                                        <i class="bi bi-facebook"></i>
+                                    </div>
+                                    <input type="url" name="facebook_url" class="form-control" 
+                                           placeholder="https://facebook.com/yourpage" value="{{ chef_profile.facebook_url }}">
+                                </div>
+                                
+                                <div class="social-item">
+                                    <div class="social-icon social-instagram">
+                                        <i class="bi bi-instagram"></i>
+                                    </div>
+                                    <input type="url" name="instagram_url" class="form-control" 
+                                           placeholder="https://instagram.com/youraccount" value="{{ chef_profile.instagram_url }}">
+                                </div>
+                                
+                                <div class="social-item">
+                                    <div class="social-icon social-twitter">
+                                        <i class="bi bi-twitter"></i>
+                                    </div>
+                                    <input type="url" name="twitter_url" class="form-control" 
+                                           placeholder="https://twitter.com/youraccount" value="{{ chef_profile.twitter_url }}">
+                                </div>
+                                
+                                <div class="social-item">
+                                    <div class="social-icon social-linkedin">
+                                        <i class="bi bi-linkedin"></i>
+                                    </div>
+                                    <input type="url" name="linkedin_url" class="form-control" 
+                                           placeholder="https://linkedin.com/in/yourprofile" value="{{ chef_profile.linkedin_url }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="form-actions">
+                <div>
+                    <button type="button" class="btn-action btn-secondary" onclick="resetForm()">
+                        <i class="bi bi-arrow-counterclockwise"></i>Reset Changes
+                    </button>
+                    <button type="button" class="btn-action btn-danger" onclick="deactivateAccount()" style="margin-left: 10px;">
+                        <i class="bi bi-person-x"></i>Deactivate Account
+                    </button>
+                </div>
+                <div>
+                    <button type="button" class="btn-action btn-secondary" onclick="previewProfile()">
+                        <i class="bi bi-eye"></i>Preview Profile
+                    </button>
+                    <button type="submit" class="btn-action btn-primary" form="profileForm">
+                        <i class="bi bi-check-lg"></i>Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Tab switching functionality
+document.querySelectorAll('.form-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        const targetTab = tab.dataset.tab;
+        
+        // Update active tab
+        document.querySelectorAll('.form-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById(targetTab).classList.add('active');
+    });
+});
+
+// Avatar upload handling
+document.getElementById('avatar-upload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.querySelector('.avatar-image').innerHTML = 
+                `<img src="${e.target.result}" alt="Profile Picture" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Day toggle functionality
+function toggleDay(dayCode, toggleElement) {
+    const isActive = toggleElement.classList.contains('active');
+    const hiddenInput = document.querySelector(`input[name="active_${dayCode}"]`);
+    
+    if (isActive) {
+        toggleElement.classList.remove('active');
+        hiddenInput.value = 'false';
+    } else {
+        toggleElement.classList.add('active');
+        hiddenInput.value = 'true';
+    }
+}
+
+// Form submission
+document.getElementById('profileForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    // Add avatar if uploaded
+    const avatarFile = document.getElementById('avatar-upload').files[0];
+    if (avatarFile) {
+        formData.append('profile_picture', avatarFile);
+    }
+    
+    try {
+        const response = await fetch('{% url "chef_portal:ajax_update_profile" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('Profile updated successfully!', 'success');
+            // Optionally reload to show updated data
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        } else {
+            showNotification('Error updating profile: ' + (data.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        showNotification('Network error. Please try again.', 'error');
+        console.error('Error:', error);
+    }
+});
+
+// Utility functions
+function resetForm() {
+    if (confirm('Are you sure you want to reset all changes? This will discard any unsaved modifications.')) {
+        location.reload();
+    }
+}
+
+function previewProfile() {
+    // Open profile preview in new tab
+    window.open('{% url "client_portal:chef_profile" chef_profile.id %}', '_blank');
+}
+
+function deactivateAccount() {
+    if (confirm('Are you sure you want to deactivate your account? This action can be reversed by contacting support.')) {
+        // Implementation for account deactivation
+        alert('Feature coming soon: Account deactivation');
+    }
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+    notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Form validation
+document.querySelectorAll('.form-control').forEach(input => {
+    input.addEventListener('blur', function() {
+        validateField(this);
+    });
+});
+
+function validateField(field) {
+    const value = field.value.trim();
+    
+    // Remove existing validation classes
+    field.classList.remove('is-valid', 'is-invalid');
+    
+    // Basic validation rules
+    if (field.hasAttribute('required') && !value) {
+        field.classList.add('is-invalid');
+        return false;
+    }
+    
+    if (field.type === 'email' && value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+            field.classList.add('is-invalid');
+            return false;
+        }
+    }
+    
+    if (field.type === 'url' && value) {
+        try {
+            new URL(value);
+        } catch {
+            field.classList.add('is-invalid');
+            return false;
+        }
+    }
+    
+    if (value) {
+        field.classList.add('is-valid');
+    }
+    
+    return true;
+}
+
+// Auto-save functionality (optional)
+let autoSaveTimeout;
+document.querySelectorAll('.form-control').forEach(input => {
+    input.addEventListener('input', function() {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => {
+            // Auto-save implementation
+            console.log('Auto-saving...');
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

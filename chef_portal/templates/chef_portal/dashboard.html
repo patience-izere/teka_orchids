@@ -1,0 +1,599 @@
+{% extends "chef_portal/base.html" %}
+{% load static %}
+
+{% block title %}Chef Dashboard - Teka{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    --danger-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.dashboard-header {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 2rem 0;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.stat-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 7px 20px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(255,255,255,0.5);
+}
+
+.stat-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+}
+
+.revenue-card { background: var(--danger-gradient); }
+.orders-card { background: var(--info-gradient); }
+.rating-card { background: var(--success-gradient); }
+.menu-items-card { background: var(--warning-gradient); }
+
+.stat-icon {
+    font-size: 2.5rem;
+    opacity: 0.8;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+
+.quick-action-card {
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: white;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+    height: 100%;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border-color: #667eea;
+}
+
+.quick-action-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+.order-badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+.order-row {
+    transition: background-color 0.2s ease;
+}
+
+.order-row:hover {
+    background-color: #f8f9fa;
+}
+
+.status-badge {
+    font-weight: 500;
+    padding: 0.4em 0.8em;
+}
+
+/* Notification bell */
+.notification-bell {
+    position: relative;
+    cursor: pointer;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #f5576c;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Animation for new orders */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+}
+
+.new-order {
+    animation: pulse 2s infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dashboard-header {
+        padding: 1.5rem 0;
+    }
+    
+    .stat-icon {
+        font-size: 2rem;
+        right: 15px;
+        top: 15px;
+    }
+    
+    .quick-action-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header p-4 mb-4">
+        <div class="row align-items-center position-relative">
+            <div class="col-lg-8">
+                <h1 class="h2 mb-2">Welcome back, {{ chef.user.get_full_name }}!</h1>
+                <p class="mb-0">Here's what's happening with your kitchen today.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="d-flex align-items-center justify-content-end gap-3">
+                    <div class="notification-bell">
+                        <i class="fas fa-bell fa-lg text-white"></i>
+                        {% if stats.new_orders_count %}
+                        <span class="notification-badge">{{ stats.new_orders_count }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="form-check form-switch form-check-reverse">
+                        <input class="form-check-input" type="checkbox" id="availabilityToggle" {% if chef.is_available %}checked{% endif %} onchange="toggleAvailability()">
+                        <label class="form-check-label fw-medium" for="availabilityToggle">
+                            {% if chef.is_available %}
+                            <i class="fas fa-circle text-success me-1" style="font-size: 0.7rem;"></i> Online
+                            {% else %}
+                            <i class="fas fa-circle text-secondary me-1" style="font-size: 0.7rem;"></i> Offline
+                            {% endif %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card stat-card revenue-card">
+                <div class="card-body position-relative">
+                    <i class="fas fa-dollar-sign stat-icon"></i>
+                    <h6 class="card-title text-uppercase mb-2">Today's Revenue</h6>
+                    <h3 class="mb-0">${{ stats.today_revenue|default:"0.00" }}</h3>
+                    {% if stats.revenue_change %}
+                    <p class="mb-0 mt-2 small">
+                        <i class="fas fa-arrow-{% if stats.revenue_change > 0 %}up text-success{% else %}down text-danger{% endif %} me-1"></i>
+                        {{ stats.revenue_change|floatformat:1 }}% from yesterday
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card stat-card orders-card">
+                <div class="card-body position-relative">
+                    <i class="fas fa-shopping-bag stat-icon"></i>
+                    <h6 class="card-title text-uppercase mb-2">Today's Orders</h6>
+                    <h3 class="mb-0">{{ stats.orders_today|default:"0" }}</h3>
+                    {% if stats.orders_change %}
+                    <p class="mb-0 mt-2 small">
+                        <i class="fas fa-arrow-{% if stats.orders_change > 0 %}up text-success{% else %}down text-danger{% endif %} me-1"></i>
+                        {{ stats.orders_change|floatformat:1 }}% from yesterday
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card stat-card rating-card">
+                <div class="card-body position-relative">
+                    <i class="fas fa-clock stat-icon"></i>
+                    <h6 class="card-title text-uppercase mb-2">Pending Orders</h6>
+                    <h3 class="mb-0">{{ stats.pending_orders|default:"0" }}</h3>
+                    {% if stats.pending_change %}
+                    <p class="mb-0 mt-2 small">
+                        <i class="fas fa-arrow-{% if stats.pending_change > 0 %}up text-warning{% else %}down text-success{% endif %} me-1"></i>
+                        {{ stats.pending_change|floatformat:1 }}% from yesterday
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card stat-card menu-items-card">
+                <div class="card-body position-relative">
+                    <i class="fas fa-utensils stat-icon"></i>
+                    <h6 class="card-title text-uppercase mb-2">Available Items</h6>
+                    <h3 class="mb-0">{{ stats.available_items|default:"0" }}</h3>
+                    {% if stats.items_change %}
+                    <p class="mb-0 mt-2 small">
+                        <i class="fas fa-arrow-{% if stats.items_change > 0 %}up text-success{% else %}down text-warning{% endif %} me-1"></i>
+                        {{ stats.items_change }} items changed
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Recent Orders -->
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Recent Orders</h5>
+                    <a href="{% url 'chef_portal:orders' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_orders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Items</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in recent_orders %}
+                                    <tr class="order-row {% if order.is_new %}new-order{% endif %}">
+                                        <td class="fw-semibold">#{{ order.id|slice:":8" }}</td>
+                                        <td>{{ order.client.get_full_name }}</td>
+                                        <td>{{ order.items_count }} items</td>
+                                        <td class="fw-semibold">${{ order.total_amount }}</td>
+                                        <td>
+                                            <span class="status-badge badge bg-{{ order.status_color|default:'primary' }}">
+                                                {{ order.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'chef_portal:order_detail' order.id %}" class="btn btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                {% if order.status == 'pending' %}
+                                                <button class="btn btn-outline-success" onclick="updateOrderStatus({{ order.id }}, 'confirmed')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No recent orders.</p>
+                            <a href="{% url 'chef_portal:menu_management' %}" class="btn btn-primary">Add Menu Items</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & Notifications -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="fw-bold mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <a href="{% url 'chef_portal:menu_management' %}" class="card quick-action-card text-decoration-none text-dark">
+                                <div class="card-body text-center p-3">
+                                    <div class="quick-action-icon bg-primary text-white mx-auto">
+                                        <i class="fas fa-utensils"></i>
+                                    </div>
+                                    <h6 class="card-title mb-0">Manage Menu</h6>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'chef_portal:orders' %}" class="card quick-action-card text-decoration-none text-dark">
+                                <div class="card-body text-center p-3">
+                                    <div class="quick-action-icon bg-info text-white mx-auto">
+                                        <i class="fas fa-list-alt"></i>
+                                    </div>
+                                    <h6 class="card-title mb-0">View Orders</h6>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'chef_portal:analytics' %}" class="card quick-action-card text-decoration-none text-dark">
+                                <div class="card-body text-center p-3">
+                                    <div class="quick-action-icon bg-success text-white mx-auto">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <h6 class="card-title mb-0">Analytics</h6>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'chef_portal:profile' %}" class="card quick-action-card text-decoration-none text-dark">
+                                <div class="card-body text-center p-3">
+                                    <div class="quick-action-icon bg-warning text-white mx-auto">
+                                        <i class="fas fa-user-edit"></i>
+                                    </div>
+                                    <h6 class="card-title mb-0">Edit Profile</h6>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Notifications -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Notifications</h5>
+                    <span class="badge bg-primary">{{ notifications|length }}</span>
+                </div>
+                <div class="card-body p-0">
+                    {% if notifications %}
+                    <div class="list-group list-group-flush">
+                        {% for notification in notifications %}
+                        <div class="list-group-item {% if not notification.read %}bg-light{% endif %}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ notification.title }}</h6>
+                                <small class="text-muted">{{ notification.time }}</small>
+                            </div>
+                            <p class="mb-1 small">{{ notification.message }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+                        <p class="text-muted small mb-0">No new notifications</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Charts -->
+    <div class="row g-4 mt-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Weekly Performance</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary active" data-period="week">Week</button>
+                        <button class="btn btn-outline-secondary" data-period="month">Month</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="fw-bold mb-0">Order Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Revenue Chart
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Revenue ($)',
+                data: [120, 190, 300, 500, 200, 300, 450],
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3
+            }, {
+                label: 'Orders',
+                data: [5, 8, 12, 18, 7, 11, 15],
+                borderColor: '#f093fb',
+                backgroundColor: 'rgba(240, 147, 251, 0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3,
+                borderDash: [5, 5]
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Order Status Chart
+    const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+    const orderStatusChart = new Chart(orderStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Placed', 'Confirmed', 'In Progress', 'Delivered', 'Cancelled'],
+            datasets: [{
+                label: 'Order Statuses',
+                data: [{{ stats.pending_orders }}, 15, 10, 50, 5],
+                backgroundColor: [
+                    '#ffc107', 
+                    '#17a2b8', 
+                    '#007bff', 
+                    '#28a745', 
+                    '#dc3545'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            },
+            cutout: '65%'
+        }
+    });
+
+    // Period switcher for charts
+    document.querySelectorAll('[data-period]').forEach(button => {
+        button.addEventListener('click', function() {
+            document.querySelectorAll('[data-period]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // In a real app, you would fetch new data based on the period
+            // For now, we'll just update the chart title as an example
+            const period = this.getAttribute('data-period');
+            document.querySelector('#revenueChart').closest('.card').querySelector('h5').textContent = 
+                period === 'week' ? 'Weekly Performance' : 'Monthly Performance';
+        });
+    });
+});
+
+function toggleAvailability() {
+    const toggle = document.getElementById('availabilityToggle');
+    const label = toggle.nextElementSibling;
+    
+    // Update label immediately for better UX
+    if (toggle.checked) {
+        label.innerHTML = '<i class="fas fa-circle text-success me-1" style="font-size: 0.7rem;"></i> Online';
+    } else {
+        label.innerHTML = '<i class="fas fa-circle text-secondary me-1" style="font-size: 0.7rem;"></i> Offline';
+    }
+    
+    fetch('{% url "chef_portal:ajax_toggle_availability" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ is_available: toggle.checked })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            // Revert toggle if request failed
+            toggle.checked = !toggle.checked;
+            if (toggle.checked) {
+                label.innerHTML = '<i class="fas fa-circle text-success me-1" style="font-size: 0.7rem;"></i> Online';
+            } else {
+                label.innerHTML = '<i class="fas fa-circle text-secondary me-1" style="font-size: 0.7rem;"></i> Offline';
+            }
+            alert('Error updating availability status');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Revert toggle on error
+        toggle.checked = !toggle.checked;
+        if (toggle.checked) {
+            label.innerHTML = '<i class="fas fa-circle text-success me-1" style="font-size: 0.7rem;"></i> Online';
+        } else {
+            label.innerHTML = '<i class="fas fa-circle text-secondary me-1" style="font-size: 0.7rem;"></i> Offline';
+        }
+        alert('Error updating availability status');
+    });
+}
+
+function updateOrderStatus(orderId, status) {
+    // In a real app, this would make an API call to update the order status
+    alert(`Order #${orderId} status updated to ${status}`);
+    // Then refresh the table row or the entire table
+}
+</script>
+{% endblock %}

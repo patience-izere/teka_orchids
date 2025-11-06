@@ -1,0 +1,441 @@
+{% extends "client_portal/base.html" %}
+{% load static %}
+
+{% block title %}Find Home Chefs - Teka{% endblock %}
+
+{% block extra_css %}
+<style>
+.search-filters {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+}
+
+.filter-section {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.filter-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.chef-grid {
+    min-height: 400px;
+}
+
+.no-results {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.search-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Search Header -->
+<section class="search-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="h2 mb-3">Find Amazing Home Chefs</h1>
+                <p class="mb-0">Discover talented chefs in your area specializing in authentic cuisines</p>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-lg-end">
+                    <span class="badge bg-light text-dark fs-6">
+                        {{ chefs|length }} chef{{ chefs|length|pluralize }} found
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container my-5">
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-lg-3 mb-4">
+            <div class="search-filters p-4 sticky-top" style="top: 2rem;">
+                <h5 class="fw-bold mb-4">
+                    <i class="fas fa-filter me-2"></i>Filters
+                </h5>
+                
+                <form method="GET" id="filter-form">
+                    <!-- Search Query -->
+                    <div class="filter-section">
+                        <label for="search" class="form-label fw-bold">Search</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="search" name="q" 
+                                   value="{{ request.GET.q }}" placeholder="Cuisine, chef name, dish...">
+                            <button type="submit" class="btn btn-outline-secondary">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Location -->
+                    <div class="filter-section">
+                        <label class="form-label fw-bold">Location</label>
+                        <button type="button" class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="getCurrentLocation()">
+                            <i class="fas fa-location-arrow me-2"></i>Use Current Location
+                        </button>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="text" class="form-control" name="city" 
+                                       value="{{ request.GET.city }}" placeholder="City">
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control" name="state" 
+                                       value="{{ request.GET.state }}" placeholder="State">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cuisine Type -->
+                    <div class="filter-section">
+                        <label class="form-label fw-bold">Cuisine Type</label>
+                        <select class="form-select" name="cuisine">
+                            <option value="">All Cuisines</option>
+                            {% for cuisine in cuisine_types %}
+                                <option value="{{ cuisine }}" 
+                                        {% if request.GET.cuisine == cuisine %}selected{% endif %}>
+                                    {{ cuisine }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Rating -->
+                    <div class="filter-section">
+                        <label class="form-label fw-bold">Minimum Rating</label>
+                        <select class="form-select" name="rating">
+                            <option value="">Any Rating</option>
+                            <option value="4" {% if request.GET.rating == "4" %}selected{% endif %}>4+ Stars</option>
+                            <option value="4.5" {% if request.GET.rating == "4.5" %}selected{% endif %}>4.5+ Stars</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Availability -->
+                    <div class="filter-section">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="available_now" 
+                                   value="1" {% if request.GET.available_now %}checked{% endif %}>
+                            <label class="form-check-label">
+                                Available Now
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Distance -->
+                    <div class="filter-section">
+                        <label for="distance" class="form-label fw-bold">
+                            Distance: <span id="distance-value">{{ request.GET.distance|default:"10" }} miles</span>
+                        </label>
+                        <input type="range" class="form-range" id="distance" name="distance" 
+                               min="1" max="50" value="{{ request.GET.distance|default:10 }}"
+                               oninput="document.getElementById('distance-value').textContent = this.value + ' miles'">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                    <a href="{% url 'client_portal:chef_list' %}" class="btn btn-outline-secondary w-100 mt-2">Clear All</a>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Chef Results -->
+        <div class="col-lg-9">
+            <!-- Sort Options -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="mb-0">Available Chefs</h5>
+                    {% if request.GET.q %}
+                        <small class="text-muted">Results for "{{ request.GET.q }}"</small>
+                    {% endif %}
+                </div>
+                <div>
+                    <select class="form-select form-select-sm" name="sort" onchange="this.form.submit()">
+                        <option value="">Sort By</option>
+                        <option value="rating" {% if request.GET.sort == "rating" %}selected{% endif %}>Highest Rated</option>
+                        <option value="distance" {% if request.GET.sort == "distance" %}selected{% endif %}>Nearest</option>
+                        <option value="reviews" {% if request.GET.sort == "reviews" %}selected{% endif %}>Most Reviews</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Chef Grid -->
+            <div class="chef-grid">
+                {% if chefs %}
+                    <div class="row g-4">
+                        {% for chef in chefs %}
+                        <div class="col-lg-6">
+                            <div class="card chef-card h-100">
+                                <div class="row g-0 h-100">
+                                    <div class="col-md-5">
+                                        {% if chef.profile_image %}
+                                            <img src="{{ chef.profile_image.url }}" 
+                                                 class="img-fluid rounded-start h-100 w-100" 
+                                                 alt="{{ chef.user.get_full_name }}" 
+                                                 style="object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-light h-100 d-flex align-items-center justify-content-center rounded-start">
+                                                <i class="fas fa-user-chef fa-3x text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <!-- Availability Badge -->
+                                        {% if chef.is_available %}
+                                            <span class="availability-badge badge bg-success">Available</span>
+                                        {% else %}
+                                            <span class="availability-badge badge bg-secondary">Offline</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-7">
+                                        <div class="card-body d-flex flex-column h-100">
+                                            <div>
+                                                <h5 class="card-title fw-bold">{{ chef.user.get_full_name }}</h5>
+                                                <p class="text-muted mb-2">
+                                                    <i class="fas fa-utensils me-1"></i>{{ chef.cuisine_specialty }}
+                                                </p>
+                                                <p class="text-muted mb-2">
+                                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                                    {{ chef.address }}
+                                                    {% if chef.distance %}
+                                                        <small>({{ chef.distance|floatformat:1 }} miles)</small>
+                                                    {% endif %}
+                                                </p>
+                                                
+                                <!-- Rating -->
+                                {% if chef.average_rating %}
+                                <div class="mb-3">
+                                    <span class="rating-stars">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= chef.average_rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <span class="text-muted ms-2">
+                                        {{ chef.average_rating|floatformat:1 }} ({{ chef.total_reviews }} reviews)
+                                    </span>
+                                </div>
+                                {% endif %}                                                <p class="card-text">{{ chef.bio|truncatewords:12 }}</p>
+                                                
+                                                <!-- Menu Items Preview -->
+                                                {% if chef.menu_items.count > 0 %}
+                                                <div class="mb-3">
+                                                    <small class="text-muted fw-bold">Popular Items:</small>
+                                                    <div class="mt-1">
+                                                        {% for item in chef.menu_items.all|slice:":2" %}
+                                                            <span class="badge bg-light text-dark me-1">{{ item.name }}</span>
+                                                        {% endfor %}
+                                                        {% if chef.menu_items.count > 2 %}
+                                                            <span class="text-muted">+{{ chef.menu_items.count|add:"-2" }} more</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="mt-auto">
+                                                <a href="{% url 'client_portal:chef_detail' chef.user.id %}" 
+                                                   class="btn btn-primary w-100">
+                                                    View Menu & Order
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                    <nav aria-label="Chef pagination" class="mt-5">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                                        <i class="fas fa-chevron-left"></i> Previous
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                                        Next <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                {% else %}
+                    <!-- No Results -->
+                    <div class="no-results">
+                        <div class="mb-4">
+                            <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                            <h3>No chefs found</h3>
+                            <p class="text-muted">Try adjusting your search criteria or location filters.</p>
+                        </div>
+                        
+                        <div class="row g-3 justify-content-center">
+                            <div class="col-auto">
+                                <a href="{% url 'client_portal:chef_list' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-refresh me-2"></i>Clear Filters
+                                </a>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-primary" onclick="getCurrentLocation()">
+                                    <i class="fas fa-location-arrow me-2"></i>Search Near Me
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h6>Suggestions:</h6>
+                            <ul class="list-unstyled text-muted">
+                                <li>• Try broader search terms</li>
+                                <li>• Increase your search distance</li>
+                                <li>• Remove specific cuisine filters</li>
+                                <li>• Check your location settings</li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form when filters change
+    const filterForm = document.getElementById('filter-form');
+    const autoSubmitElements = filterForm.querySelectorAll('select, input[type="checkbox"]');
+    
+    autoSubmitElements.forEach(element => {
+        element.addEventListener('change', function() {
+            // Don't auto-submit for text inputs
+            if (this.type !== 'text') {
+                filterForm.submit();
+            }
+        });
+    });
+    
+    // Handle location detection
+    window.getCurrentLocation = function() {
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by this browser.');
+            return;
+        }
+        
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Getting Location...';
+        button.disabled = true;
+        
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                // Add location parameters to current URL
+                const url = new URL(window.location);
+                url.searchParams.set('lat', position.coords.latitude);
+                url.searchParams.set('lng', position.coords.longitude);
+                url.searchParams.delete('city');
+                url.searchParams.delete('state');
+                
+                window.location.href = url.toString();
+            },
+            function(error) {
+                console.error('Error getting location:', error);
+                alert('Unable to get your location. Please enter your city and state manually.');
+                
+                button.innerHTML = originalText;
+                button.disabled = false;
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000
+            }
+        );
+    };
+});
+
+// Handle search form submission with location
+document.getElementById('filter-form').addEventListener('submit', async function(e) {
+    const searchInput = document.querySelector('input[name="q"]');
+    const cityInput = document.querySelector('input[name="city"]');
+    const stateInput = document.querySelector('input[name="state"]');
+    
+    // If searching and no location specified, try to get current location
+    if (searchInput.value && !cityInput.value && !stateInput.value) {
+        if (navigator.geolocation && !document.querySelector('input[name="lat"]')) {
+            e.preventDefault();
+            
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 300000
+                    });
+                });
+                
+                // Add hidden inputs for coordinates
+                const latInput = document.createElement('input');
+                latInput.type = 'hidden';
+                latInput.name = 'lat';
+                latInput.value = position.coords.latitude;
+                
+                const lngInput = document.createElement('input');
+                lngInput.type = 'hidden';
+                lngInput.name = 'lng';
+                lngInput.value = position.coords.longitude;
+                
+                this.appendChild(latInput);
+                this.appendChild(lngInput);
+                
+                this.submit();
+            } catch (error) {
+                // Continue with search without location
+                console.log('Could not get location, searching without it');
+                this.submit();
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
