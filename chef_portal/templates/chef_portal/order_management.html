@@ -752,7 +752,8 @@ function refreshOrders(status = '') {
 }
 
 function printOrder(orderId) {
-    window.open(`{% url 'chef_portal:print_order' 0 %}`.replace('0', orderId), '_blank');
+    // Use a dummy UUID so Django can reverse the URL; replace with actual orderId at runtime
+    window.open(`{% url 'chef_portal:print_order' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', orderId), '_blank');
 }
 
 function printOrderSummary() {

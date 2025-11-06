@@ -26,7 +26,7 @@ urlpatterns = [
     path('ajax/menu-item/delete/', views.ajax_delete_menu_item, name='ajax_delete_menu_item'),
     path('ajax/profile/update/', views.ajax_update_profile, name='ajax_update_profile'),
     path('ajax/analytics-data/', views.ajax_analytics_data, name='ajax_analytics_data'),
-    path('order/<int:order_id>/detail/', views.order_detail, name='order_detail'),
-    path('order/<int:order_id>/print/', views.print_order, name='print_order'),
+    path('order/<uuid:order_id>/detail/', views.order_detail, name='order_detail'),
+    path('order/<uuid:order_id>/print/', views.print_order, name='print_order'),
     path('export/analytics/', views.export_analytics, name='export_analytics'),
 ]

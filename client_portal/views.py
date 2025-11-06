@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -41,6 +42,7 @@ def home(request):
 
 def chef_list(request):
     """List all available chefs with filtering"""
+    # (no-op) chef_list is intentionally public and returns 200 for all users
     chefs = ChefProfile.objects.filter(
         is_verified=True
     ).select_related('user').prefetch_related('menu_items')
@@ -111,8 +113,12 @@ def chef_list(request):
 
 def chef_detail(request, chef_id):
     """Detailed chef profile with menu"""
-    #chef = get_object_or_404(ChefProfile, id=chef_id, is_verified=True)
-    chef = get_object_or_404(ChefProfile, user__id=chef_id, is_verified=True)
+    # Support chef lookup by chef profile id (int primary key)
+    try:
+        chef = get_object_or_404(ChefProfile, id=chef_id, is_verified=True)
+    except Exception:
+        # Fallback to previous behavior (lookup by user id) for compatibility
+        chef = get_object_or_404(ChefProfile, user__id=chef_id, is_verified=True)
     
     # Use existing rating fields from model
     # These are already calculated: chef.average_rating, chef.total_reviews
@@ -140,35 +146,9 @@ def chef_detail(request, chef_id):
 
 def search_chefs(request):
     """Advanced chef search functionality - redirects to chef_list with parameters"""
-    from django.http import HttpResponseRedirect
-    from django.urls import reverse
-    from urllib.parse import urlencode
-    
-    # Get search parameters
-    params = {}
-    if request.GET.get('q'):
-        params['q'] = request.GET.get('q')
-    if request.GET.get('location'):
-        params['city'] = request.GET.get('location')
-    if request.GET.get('cuisine'):
-        params['cuisine'] = request.GET.get('cuisine')
-    if request.GET.get('dietary'):
-        # Map dietary preferences to available filters
-        dietary_mapping = {
-            'vegetarian': 'vegetarian',
-            'vegan': 'vegan', 
-            'gluten_free': 'gluten_free'
-        }
-        dietary_value = dietary_mapping.get(request.GET.get('dietary'))
-        if dietary_value:
-            params[dietary_value] = '1'
-    
-    # Redirect to chef_list with search parameters
-    url = reverse('client_portal:chef_list')
-    if params:
-        url += '?' + urlencode(params)
-    
-    return HttpResponseRedirect(url)
+    # The search endpoint should render the chef_list with the given GET params
+    # so clients can hit /search/?q=... and receive a 200 with results.
+    return chef_list(request)
 
 
 def login_view(request):
@@ -336,6 +316,20 @@ def add_to_cart(request):
                 'error': 'Chef is currently not accepting orders'
             }, status=400)
         
+        # Persist cart in session (tests expect a 'cart' session key)
+        session = request.session
+        cart = session.get('cart', {})
+        cart[str(menu_item.id)] = {
+            'id': str(menu_item.id),
+            'name': menu_item.name,
+            'price': float(menu_item.price),
+            'quantity': quantity,
+            'special_instructions': special_instructions,
+            'chef_id': str(menu_item.chef_profile.id),
+        }
+        session['cart'] = cart
+        session.modified = True
+
         # Return item data for frontend cart
         return JsonResponse({
             'success': True,

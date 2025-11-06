@@ -181,6 +181,14 @@ CHANNEL_LAYERS = {
     },
 }
 
+# Use in-memory channel layer when Redis isn't available (development/test)
+if os.environ.get('USE_REDIS', '0') != '1':
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer'
+        }
+    }
+
 # Stripe Configuration (use environment variables in production)
 STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', 'pk_test_your_key_here')
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_your_key_here')

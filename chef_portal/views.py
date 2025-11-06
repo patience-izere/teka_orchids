@@ -133,8 +133,9 @@ def chef_dashboard(request):
         'today_revenue': today_revenue,
         'orders_today': today_orders.count(),
         'pending_orders': pending_orders.count(),
-        'menu_items_count': menu_items.count(),
-        'available_items': available_items,
+        # Menu items and availability
+        'menu_items_count': menu_items.count() if 'menu_items' in locals() else MenuItem.objects.filter(chef_profile=chef_profile).count(),
+        'available_items': available_items if 'available_items' in locals() else MenuItem.objects.filter(chef_profile=chef_profile, is_available=True).count(),
     }
     
     context = {
@@ -142,7 +143,7 @@ def chef_dashboard(request):
         'recent_orders': recent_orders,
         'pending_orders': pending_orders,
         'stats': stats,
-        'recent_reviews': recent_reviews,
+        'recent_reviews': recent_reviews if 'recent_reviews' in locals() else Review.objects.filter(chef_profile=chef_profile).order_by('-created_at')[:5],
     }
     
     return render(request, 'chef_portal/dashboard.html', context)

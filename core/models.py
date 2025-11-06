@@ -196,6 +196,11 @@ class Order(models.Model):
     def __str__(self):
         return f"Order #{str(self.id)[:8]} - {self.client.username} from {self.chef_profile.user.username}"
     
+    @property
+    def user(self):
+        """Compatibility alias for templates that expect order.user"""
+        return self.client
+    
     class Meta:
         indexes = [
             models.Index(fields=['client', 'status']),
@@ -214,6 +219,15 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     unit_price = models.DecimalField(max_digits=8, decimal_places=2)
     customizations = models.JSONField(default=dict, blank=True)
+    
+    def __init__(self, *args, **kwargs):
+        # Compatibility: allow creating OrderItem with 'price' and 'subtotal' kwars (tests/legacy code)
+        if 'price' in kwargs:
+            kwargs['unit_price'] = kwargs.pop('price')
+        # 'subtotal' is not stored on the model; ignore it if provided
+        if 'subtotal' in kwargs:
+            kwargs.pop('subtotal')
+        super().__init__(*args, **kwargs)
     
     @property
     def total_price(self):

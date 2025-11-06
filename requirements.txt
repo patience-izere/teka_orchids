@@ -1,0 +1,14 @@
+Django>=4.2,<5
+pytest
+pytest-django
+coverage
+black
+ruff
+pre-commit
+mypy
+daphne
+graphene-django
+channels
+django-cors-headers
+channels-redis
+stripe

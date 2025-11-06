@@ -7,7 +7,7 @@ urlpatterns = [
     # Public pages (no authentication required)
     path('', views.home, name='home'),
     path('chefs/', views.chef_list, name='chef_list'),
-    path('chef/<uuid:chef_id>/', views.chef_detail, name='chef_detail'),
+    path('chef/<int:chef_id>/', views.chef_detail, name='chef_detail'),
     path('search/', views.search_chefs, name='search_chefs'),
     
     # Authentication
@@ -23,8 +23,9 @@ urlpatterns = [
     
     # Cart and ordering
     path('cart/', views.cart_view, name='cart'),
+    # Checkout: allow both routes (with and without order_id) to use the same name so reverse() with kwargs works
+    path('checkout/<uuid:order_id>/', views.checkout, name='checkout'),
     path('checkout/', views.checkout, name='checkout'),
-    path('checkout/<uuid:order_id>/', views.checkout, name='checkout_order'),
     path('create-order/', views.create_order, name='create_order'),
     path('add-to-cart/', views.add_to_cart, name='add_to_cart'),
     path('remove-from-cart/', views.remove_from_cart, name='remove_from_cart'),
@@ -32,6 +33,6 @@ urlpatterns = [
     path('validate-cart/', views.validate_cart, name='validate_cart'),
     
     # AJAX endpoints for dynamic functionality
-    path('ajax/chef-menu/<uuid:chef_id>/', views.get_chef_menu_ajax, name='ajax_chef_menu'),
+    path('ajax/chef-menu/<int:chef_id>/', views.get_chef_menu_ajax, name='ajax_chef_menu'),
     path('ajax/submit-review/', views.submit_review_ajax, name='ajax_submit_review'),
 ]
